@@ -22,3 +22,6 @@ Shows what a finished Wattmeter looks like, and has some important tips on popul
 
 NOTE: There is no tri-state on the MISO line.  This must be added into the next board revision.  Because of this, the board works properly when it is the only device on the SPI bus.  If more devices are used on the same SPI bus, the CS line (inverted) must be used to drive a tristate to isolate the MISO line from this board!!! 
 
+IMG_20170828_063213658.jpg
+-----------------------------
+Image of the blank and populated PCB of the wattmeter
