@@ -18,5 +18,7 @@ Open them with EagleCAD and print them out, and have them nearby while populatin
 
 Construction of Wattmeter.pdf
 -----------------------------
-Shows what a finished Wattmeter looks like, and has some important tips on populating the PCBs.
+Shows what a finished Wattmeter looks like, and has some important tips on populating the PCBs.  
+
+NOTE: There is no tri-state on the MISO line.  This must be added into the next board revision.  Because of this, the board works properly when it is the only device on the SPI bus.  If more devices are used on the same SPI bus, the CS line (inverted) must be used to drive a tristate to isolate the MISO line from this board!!! 
 
