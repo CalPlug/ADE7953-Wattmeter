@@ -58,4 +58,6 @@ Active Energy A (hex): 5132
 
 Documents
 ----------
-This folder contains all the files required to construct the Wattmeter. Please refer to the README inside the folder for more details on using the files.
+This folder contains all the files required to construct an isolated ADE7953 wattmeter board. Please refer to the README inside the folder for more details on using the files.
+
+NOTE: In the current board revision, there is no tri-state on the MISO line on the external side of the chipset. This must be added into the next board revision. Because of this, the board works properly when it is the only device on the SPI bus. If more devices are used on the same SPI bus, the CS line (inverted) must be used to drive a tristate to isolate the MISO line from this board!!!
