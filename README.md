@@ -1,10 +1,13 @@
 # ADE7953-Wattmeter
 
-Simple library for operating the ADE7953 Single-Phase AC Line measurement IC over SPI for Arduino Uno 
+Example library for operating the ADE7953 Single-Phase AC Line measurement IC over SPI interfacing 
 Created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
-February 23, 2017 
 University of California, Irvine - California Plug Load Research Center (CalPlug)
-Released into the public domain. This is an example C++ library for Arduino for operating the ADE7953 Single-Phase AC Line measurement IC over SPI for Arduino Uno 
+February 23, 2017
+
+Copyright (C) The Regents of the University of California, 2017
+
+Released into the public domain. This is an example C++ library for Arduino for operating the ADE7953 Single-Phase AC Line measurement IC over SPI and tested with the Arduino Uno and C++ Arduino-style compiler for the Espressif ESP8266. 
 
 Installation
 --------------------------------------------------------------------------------
@@ -29,7 +32,7 @@ To stop using this library, delete that line from your sketch.
 Background of Operation
 --------------------------------------------------------------------------------
 
-The ADE7953 uses registers for communication.  Depending on the type, this can be an 8 bit, 16 bit, 24 bit or 32 bit register.  Communication of over 8 bits uses sequential bytes.  For addresses, the same command may be represented in multiple bit versions (eg a 24bit or 32 bit). When you call on a certain address, the corresponding value is returned with the value bit size corresponding to the 24 or 32 bit address called on. The responding value returns as the function called and of the same bit size. The Serial Monitor runs at 115200 baudrate. 
+The ADE7953 uses registers for communication.  Depending on the type, this can be an 8 bit, 16 bit, 24 bit or 32 bit register.  Communication of over 8 bits uses sequential bytes using typical SPI byte-wise communication.  There are redundancies in how registers are accessed via different bit values for registers.  For addresses, the same command may be represented in multiple bit versions (eg a 24bit or 32 bit). When you call on a certain address, the corresponding value is returned with the value bit size corresponding to the 24 or 32 bit address called on. The responding value returns as the function called and of the same bit size.  Refer to the documentation!  For Debug, the Serial Monitor runs at 115200 baudrate when the reporting DEBUG functionality is activated.  Uncomment IFDEF statements in the library for library operation debug. 
 
 Usage
 --------------------------------------------------------------------------------
@@ -39,7 +42,7 @@ There are several layers of functionality in the library.  Functions are defined
 Demo
 --------------------------------------------------------------------------------
 
-When connecting a 80-Watt Lightbulb with a 110Voltage source and using our demo code, the serial monitor reads out the following approximate measurements from the current sensor:
+When connecting a 80-Watt Lightbulb with a 110V AC, 60HZ, source and using our demo code, the serial monitor reads out the following approximate measurements from the current sensor:
 
 Vrms (V): 110
 
@@ -58,6 +61,5 @@ Active Energy A (hex): 5132
 
 Documents
 ----------
-This folder contains all the files required to construct an isolated ADE7953 wattmeter board. Please refer to the README inside the folder for more details on using the files.
+This folder contains all the files required to construct an isolated ADE7953 wattmeter board. Please refer to the README inside the folder for more details on using the files.  The version 3 supercedes the version 2 board.  In the Version 2 revision, there is no tri-state on the MISO line on the external side of the chipset. Because of this, the board works properly when it is the only device on the SPI bus. If more devices are used on the same SPI bus, the CS line (inverted) must be used to drive a tristate to isolate the MISO line from this board.  The Version 2 board has the neutral connected to the isolated ground.  In usage, several catostrophic board failures resulted (not that crazy, look at how the AD datasheet and demo boards are wired :) ).  As previously stated, the version 2 of the board does not allow for multiple devices to be used on the SPI as the MISO line is held low when communication has ended (the isolator is always enabled, causing this).  In the updated version 3, a tri-state buffer allows proper SPI usage with multiple devices.
 
-NOTE: In the current board revision, there is no tri-state on the MISO line on the external side of the chipset. This must be added into the next board revision. Because of this, the board works properly when it is the only device on the SPI bus. If more devices are used on the same SPI bus, the CS line (inverted) must be used to drive a tristate to isolate the MISO line from this board!!!
