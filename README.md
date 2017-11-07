@@ -54,12 +54,14 @@ Active Power A (mW): 80000
 
 Reactive Power A (mW): 4100
 
-Power Factor A (x100): 99.90
+Power Factor (div 100): 99.90
 
 Active Energy A (hex): 5132 
 
 
-Documents
+Physical Demo Board
 ----------
-This folder contains all the files required to construct an isolated ADE7953 wattmeter board. Please refer to the README inside the folder for more details on using the files.  The version 3 supercedes the version 2 board.  In the Version 2 revision, there is no tri-state on the MISO line on the external side of the chipset. Because of this, the board works properly when it is the only device on the SPI bus. If more devices are used on the same SPI bus, the CS line (inverted) must be used to drive a tristate to isolate the MISO line from this board.  The Version 2 board has the neutral connected to the isolated ground.  In usage, several catostrophic board failures resulted (not that crazy, look at how the AD datasheet and demo boards are wired :) ).  As previously stated, the version 2 of the board does not allow for multiple devices to be used on the SPI as the MISO line is held low when communication has ended (the isolator is always enabled, causing this).  In the updated version 3, a tri-state buffer allows proper SPI usage with multiple devices.
+This folder contains all the files required to construct an isolated ADE7953 wattmeter board. Please refer to the README inside the folder for more details on using the files.  The version 3 supercedes the version 2 board.  In the Version 2 revision, there is no tri-state on the MISO line on the external side of the chipset. Because of this, the board works properly when it is the only device on the SPI bus. If more devices are used on the same SPI bus, the CS line (inverted) must be used to drive a tristate to isolate the MISO line from this board.  
+
+The Version 2 board has the neutral connected to the isolated ground.  In usage, several catostrophic board failures resulted (not that crazy, look at how the AD datasheet and demo boards are wired :) ).  As previously stated, the version 2 of the board does not allow for multiple devices to be used on the SPI as the MISO line is held low when communication has ended (the isolator is always enabled, causing this).  In the updated version 3, a tri-state buffer allows proper SPI usage with multiple devices.
 
