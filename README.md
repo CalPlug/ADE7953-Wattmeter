@@ -1,7 +1,7 @@
 # ADE7953-Wattmeter
 
 Example library for operating the ADE7953 Single-Phase AC Line measurement IC over SPI interfacing 
-Created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
+Created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D. 
 Version 3 PCB update by Yuxiang (Eric) Li	
 University of California, Irvine - California Plug Load Research Center (CalPlug)
 February 23, 2017
