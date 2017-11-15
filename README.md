@@ -4,6 +4,8 @@ Example library for operating the ADE7953 Single-Phase AC Line measurement IC ov
 
 Created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
 
+PCB v1 and v2 Board design by Damien Putignani
+
 Version 3 PCB update by Yuxiang (Eric) Li	and Zihan (Bronco) Chen
 
 University of California, Irvine - California Plug Load Research Center (CalPlug)
