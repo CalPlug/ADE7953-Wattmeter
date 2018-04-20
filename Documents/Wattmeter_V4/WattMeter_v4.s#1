@@ -9660,6 +9660,8 @@ Basic schematic elements and footprints for 0603, 1206, and PTH 1/10th watt (sma
 <part name="R28" library="SparkFun" deviceset="RESISTOR" device="0603-RES" value="4.7k"/>
 <part name="R29" library="SparkFun" deviceset="RESISTOR" device="0603-RES" value="55k"/>
 <part name="R32" library="SparkFun" deviceset="RESISTOR" device="0603-RES" value="100k"/>
+<part name="GNDI11" library="supply1" deviceset="GNDI" device=""/>
+<part name="GNDI12" library="supply1" deviceset="GNDI" device=""/>
 <part name="AGND7" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="AGND" device=""/>
 <part name="U6" library="wattmeter" deviceset="PS2505" device=""/>
 <part name="U10" library="wattmeter" deviceset="PS2505" device=""/>
@@ -9678,8 +9680,6 @@ Basic schematic elements and footprints for 0603, 1206, and PTH 1/10th watt (sma
 <part name="AGND8" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="AGND" device=""/>
 <part name="J3" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="J2" device="X2MM" package3d_urn="urn:adsk.eagle:package:15506/1"/>
 <part name="R2" library="Nizanlib" deviceset="0402-RES" device="" value="560"/>
-<part name="AGND9" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="AGND" device=""/>
-<part name="AGND10" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="AGND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -9826,6 +9826,8 @@ Basic schematic elements and footprints for 0603, 1206, and PTH 1/10th watt (sma
 <instance part="R28" gate="G$1" x="-68.58" y="-78.74" rot="R270"/>
 <instance part="R29" gate="G$1" x="-53.34" y="-68.58" rot="R180"/>
 <instance part="R32" gate="G$1" x="-40.64" y="-68.58" rot="R180"/>
+<instance part="GNDI11" gate="G$1" x="-68.58" y="-88.9"/>
+<instance part="GNDI12" gate="G$1" x="-68.58" y="-40.64" rot="R180"/>
 <instance part="AGND7" gate="VR1" x="-68.58" y="-15.24"/>
 <instance part="U6" gate="G$1" x="-243.84" y="-86.36"/>
 <instance part="U10" gate="G$1" x="-241.3" y="-55.88" rot="R180"/>
@@ -9844,8 +9846,6 @@ Basic schematic elements and footprints for 0603, 1206, and PTH 1/10th watt (sma
 <instance part="AGND8" gate="VR1" x="33.02" y="35.56" rot="R270"/>
 <instance part="J3" gate="G$1" x="-292.1" y="-76.2" rot="R90"/>
 <instance part="R2" gate="G$1" x="-261.62" y="-88.9" rot="R180"/>
-<instance part="AGND9" gate="VR1" x="-68.58" y="-88.9"/>
-<instance part="AGND10" gate="VR1" x="-68.58" y="-40.64" rot="R180"/>
 </instances>
 <busses>
 </busses>
@@ -10637,10 +10637,20 @@ Basic schematic elements and footprints for 0603, 1206, and PTH 1/10th watt (sma
 <wire x1="-231.14" y1="-88.9" x2="-226.06" y2="-88.9" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<wire x1="-99.06" y1="-64.77" x2="-99.06" y2="-71.12" width="0.1524" layer="91"/>
+<wire x1="-99.06" y1="-66.04" x2="-99.06" y2="-71.12" width="0.1524" layer="91"/>
 <pinref part="GNDI24" gate="G$1" pin="GNDI"/>
 <pinref part="U11" gate="G$1" pin="GND"/>
-<wire x1="-99.06" y1="-64.77" x2="-90.17" y2="-64.77" width="0.1524" layer="91"/>
+<wire x1="-99.06" y1="-66.04" x2="-90.17" y2="-64.77" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="GNDI11" gate="G$1" pin="GNDI"/>
+<pinref part="R28" gate="G$1" pin="2"/>
+<wire x1="-68.58" y1="-86.36" x2="-68.58" y2="-83.82" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="R7" gate="G$1" pin="1"/>
+<pinref part="GNDI12" gate="G$1" pin="GNDI"/>
+<wire x1="-68.58" y1="-43.18" x2="-68.58" y2="-45.72" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="U10" gate="G$1" pin="CATHODE"/>
@@ -10767,6 +10777,14 @@ Basic schematic elements and footprints for 0603, 1206, and PTH 1/10th watt (sma
 <junction x="-220.98" y="-78.74"/>
 </segment>
 </net>
+<net name="+3V3" class="0">
+<segment>
+<pinref part="+3V1" gate="G$1" pin="+3V3"/>
+<wire x1="-99.06" y1="-58.42" x2="-99.06" y2="-53.34" width="0.1524" layer="91"/>
+<pinref part="U11" gate="G$1" pin="VCC"/>
+<wire x1="-90.17" y1="-57.15" x2="-99.06" y2="-58.42" width="0.1524" layer="91"/>
+</segment>
+</net>
 <net name="LNV1" class="0">
 <segment>
 <pinref part="R30" gate="G$1" pin="1"/>
@@ -10873,16 +10891,6 @@ Basic schematic elements and footprints for 0603, 1206, and PTH 1/10th watt (sma
 <pinref part="J2" gate="J$1" pin="1"/>
 <wire x1="35.56" y1="35.56" x2="50.8" y2="35.56" width="0.1524" layer="91"/>
 </segment>
-<segment>
-<pinref part="R28" gate="G$1" pin="2"/>
-<wire x1="-68.58" y1="-86.36" x2="-68.58" y2="-83.82" width="0.1524" layer="91"/>
-<pinref part="AGND9" gate="VR1" pin="AGND"/>
-</segment>
-<segment>
-<pinref part="R7" gate="G$1" pin="1"/>
-<wire x1="-68.58" y1="-43.18" x2="-68.58" y2="-45.72" width="0.1524" layer="91"/>
-<pinref part="AGND10" gate="VR1" pin="AGND"/>
-</segment>
 </net>
 <net name="N$36" class="0">
 <segment>
@@ -10915,13 +10923,11 @@ Basic schematic elements and footprints for 0603, 1206, and PTH 1/10th watt (sma
 <net name="N$37" class="0">
 <segment>
 <pinref part="R28" gate="G$1" pin="1"/>
-<wire x1="-68.58" y1="-62.23" x2="-68.58" y2="-68.58" width="0.1524" layer="91"/>
+<wire x1="-68.58" y1="-63.5" x2="-68.58" y2="-68.58" width="0.1524" layer="91"/>
 <pinref part="R29" gate="G$1" pin="2"/>
 <wire x1="-68.58" y1="-68.58" x2="-68.58" y2="-73.66" width="0.1524" layer="91"/>
 <wire x1="-58.42" y1="-68.58" x2="-68.58" y2="-68.58" width="0.1524" layer="91"/>
 <junction x="-68.58" y="-68.58"/>
-<pinref part="U11" gate="G$1" pin="B2"/>
-<wire x1="-72.39" y1="-62.23" x2="-68.58" y2="-62.23" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$38" class="0">
@@ -10930,10 +10936,6 @@ Basic schematic elements and footprints for 0603, 1206, and PTH 1/10th watt (sma
 <pinref part="R7" gate="G$1" pin="2"/>
 <wire x1="-68.58" y1="-58.42" x2="-58.42" y2="-58.42" width="0.1524" layer="91"/>
 <wire x1="-68.58" y1="-55.88" x2="-68.58" y2="-58.42" width="0.1524" layer="91"/>
-<pinref part="U11" gate="G$1" pin="B1"/>
-<wire x1="-72.39" y1="-59.69" x2="-68.58" y2="-59.69" width="0.1524" layer="91"/>
-<wire x1="-68.58" y1="-59.69" x2="-68.58" y2="-58.42" width="0.1524" layer="91"/>
-<junction x="-68.58" y="-58.42"/>
 </segment>
 </net>
 <net name="CF1" class="0">
@@ -10986,9 +10988,9 @@ Basic schematic elements and footprints for 0603, 1206, and PTH 1/10th watt (sma
 <pinref part="U7" gate="G$1" pin="OUTB"/>
 <wire x1="-208.28" y1="-53.34" x2="-208.28" y2="-81.28" width="0.1524" layer="91"/>
 <wire x1="-208.28" y1="-81.28" x2="-109.22" y2="-81.28" width="0.1524" layer="91"/>
-<wire x1="-109.22" y1="-81.28" x2="-109.22" y2="-62.23" width="0.1524" layer="91"/>
+<wire x1="-109.22" y1="-81.28" x2="-109.22" y2="-63.5" width="0.1524" layer="91"/>
 <pinref part="U11" gate="G$1" pin="S"/>
-<wire x1="-109.22" y1="-62.23" x2="-90.17" y2="-62.23" width="0.1524" layer="91"/>
+<wire x1="-109.22" y1="-63.5" x2="-90.17" y2="-62.23" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$40" class="0">
@@ -11034,21 +11036,13 @@ Basic schematic elements and footprints for 0603, 1206, and PTH 1/10th watt (sma
 </net>
 <net name="VP_IN" class="0">
 <segment>
+<pinref part="U11" gate="G$1" pin="A"/>
+<wire x1="-90.17" y1="-59.69" x2="-111.76" y2="-60.96" width="0.1524" layer="91"/>
+<label x="-112.014" y="-59.182" size="1.778" layer="95"/>
+</segment>
+<segment>
 <wire x1="-124.46" y1="-10.16" x2="-119.38" y2="-10.16" width="0.1524" layer="91"/>
 <label x="-124.46" y="-10.16" size="1.778" layer="95"/>
-</segment>
-<segment>
-<pinref part="U11" gate="G$1" pin="A"/>
-<wire x1="-90.17" y1="-59.69" x2="-109.22" y2="-59.69" width="0.1524" layer="91"/>
-<label x="-109.22" y="-58.42" size="1.778" layer="95"/>
-</segment>
-</net>
-<net name="+3V3" class="0">
-<segment>
-<pinref part="+3V1" gate="G$1" pin="+3V3"/>
-<pinref part="U11" gate="G$1" pin="VCC"/>
-<wire x1="-99.06" y1="-53.34" x2="-99.06" y2="-57.15" width="0.1524" layer="91"/>
-<wire x1="-99.06" y1="-57.15" x2="-90.17" y2="-57.15" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
