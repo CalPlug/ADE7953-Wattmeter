@@ -1,28 +1,28 @@
 /*
  ADE7953.cpp - Example library for operating the ADE7953 Single-Phase AC Line measurement IC over SPI for Arduino Uno 
-  Created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
+  Created by Umar Kazmi, Crystal Lai, and Michael J. Klopfer, Ph.D.
   January 23, 2017 - 0.1 (pre-release)
-  May 3, 2018 - v6.2 (current version) 
-  Verified for compatability with Arduino Uno and Espressif ESP8266, please see Readme about ESP32 compatability.
+  May 3, 2018 - v6.2 (current version) - by MJK
+  Verified for compatibility with Arduino Uno and Espressif ESP8266, please see README about ESP32 compatibility.
   University of California, Irvine - California Plug Load Research Center (CalPlug)
-  Released into the public domain.
+  Copyright: The Regents of the University of California
+  Released into the public domain with Share-alike licensing.
+  Be decent: if our work helped you, then please reference/acknowledge this project and its authors in your work!
+  
+  Note: Please refer to the Analog Devices ADE7953 datasheet - much of this library was based directly on the statements and methods provided in it!  Their authors get paid, trust them over us!
 */
 
 #include "Arduino.h"
 #include <SPI.h>
 #include "ADE7953.h"
-//#define ADE7953_VERBOSE_DEBUG //This line turns on verbose debug via serial monitor (Normally off or //'ed).  Use sparingly and in a test program!  Turning this on can take a lot of memory!  This is non-specific and for all functions, beware, it's a lot of output!  Reported bytes are in HEX
-
-
-
-
+//Debug Control:
+//#define ADE7953_VERBOSE_DEBUG //This line turns on verbose debug via serial monitor (Normally off or //'ed).  Use sparingly and in a test program to debug operation!  Turning this on can take a lot of memory and the delay from USB printing out every statement is taxing temporally!  This is non-specific and for all functions, beware, it's a lot of output!  Reported bytes are in HEX
 
 //******************************************************************************************
 
 
-
 //*****************ADE7953 Register Value Constants*****************//
-//The #define used to save space where functions are not invoked - list of full general commands for ADE7953, not all implemented
+//The #define used to save space where functions are not invoked - list of full general commands for ADE7953, not all implemented in current code - put in place as prep for potential extended development.
 
 //8-bit Registers
 #define SAGCYC_8 0x000 //SAGCYC, (R/W) Default: 0x00, Unsigned, Sag lines Cycle 
@@ -38,7 +38,6 @@
 #define EX_REF_8 0x800 //EX_REF, (R/W) Default: 0x00, Unsigned, Reference input configuration:0 = internal 1 = external 
 
 //*DISNOLOAD register
-
 //**LCYCMODE register
 
 
@@ -210,7 +209,6 @@
 
 //****************User Program Functions*****************
 
-
 uint8_t ADE7953::getVersion(){
   return spiAlgorithm8_read(functionBitVal(Version_8,1), functionBitVal(Version_8,0));  //An example of the address lookup - the spiAlgorithm8_read((functionBitVal(addr,1), functionBitVal(addr,1)) would return the eqivenet to spiAlgorithm8_read(0x07,0x02) when working properly
 }
@@ -218,7 +216,7 @@ uint8_t ADE7953::getVersion(){
 float ADE7953::getPowerFactorA(){  
 	int16_t value=0;  
 	value=spiAlgorithm16_read((functionBitVal(PFA_16,1)),(functionBitVal(PFA_16,0))); 
-	float decimal = decimalize(value, 327.67, 0);
+	float decimal = decimalize(value, 327.67, 0); //convert to float with calibration factors specified
 return abs(decimal);
   }     
 
@@ -231,7 +229,7 @@ return value;
 float ADE7953::getPeriod(){  
 	uint16_t value=0;  
 	value=spiAlgorithm16_read((functionBitVal(Period_16,1)),(functionBitVal(Period_16,0))); 
-	float decimal = decimalize(value, 1, 0);
+	float decimal = decimalize(value, 1, 0); //convert to float with calibration factors specified
 return decimal;
   }
 
@@ -250,7 +248,7 @@ return value;
 float ADE7953::getVrms(){  
 	unsigned long value=0;  
 	value=spiAlgorithm32_read((functionBitVal(VRMS_32,1)),(functionBitVal(VRMS_32,0)));
-	float decimal = decimalize(value, 19090, 0);
+	float decimal = decimalize(value, 19090, 0); //convert to float with calibration factors specified
 return decimal;
   }  
   
@@ -263,7 +261,7 @@ return value;
 float ADE7953::getIrmsA(){  
 	unsigned long value=0;  
 	value=spiAlgorithm32_read((functionBitVal(IRMSA_32,1)),(functionBitVal(IRMSA_32,0))); 
-	float decimal = decimalize(value, 1327, 0);
+	float decimal = decimalize(value, 1327, 0); //convert to float with calibration factors specified
 return decimal;
   }
   
@@ -300,21 +298,21 @@ return value;
 float ADE7953::getInstApparentPowerA(){  
 	long value=0;  
 	value=spiAlgorithm32_read((functionBitVal(AVA_32,1)),(functionBitVal(AVA_32,0))); 
-	float decimal = decimalize(value, 1.502, 0);
+	float decimal = decimalize(value, 1.502, 0); //convert to float with calibration factors specified
 return abs(decimal);
   }
   
 float ADE7953::getInstActivePowerA(){  
 	long value=0;  
 	value=spiAlgorithm32_read((functionBitVal(AWATT_32,1)),(functionBitVal(AWATT_32,0))); 
-	float decimal = decimalize(value, 1.502, 0);
+	float decimal = decimalize(value, 1.502, 0); //convert to float with calibration factors specified
 return abs(decimal);
   }
   
 float ADE7953::getInstReactivePowerA(){  
 	long value=0;  
 	value=spiAlgorithm32_read((functionBitVal(AVAR_32,1)),(functionBitVal(AVAR_32,0))); 
-	float decimal = decimalize(value, 1.502, 0);
+	float decimal = decimalize(value, 1.502, 0); //convert to float with calibration factors specified
 return decimal;
   }
   
@@ -338,28 +336,28 @@ void ADE7953::initialize(){
    Serial.print("ADE7953:initialize function started "); 
   #endif
 
-  pinMode(_SS, OUTPUT); // FYI: SS is pin 10 by Arduino's SPI library, set SS pin as Output
-  digitalWrite(_SS, HIGH); //Initialize pin as HIGH
+  pinMode(_SS, OUTPUT); // FYI: SS is pin 10 by Arduino's SPI library on many boards (including the UNO), set SS pin as Output
+  digitalWrite(_SS, HIGH); //Initialize pin as HIGH to bring communication inactive
   SPI.begin();
   delay(50);
   SPI.setBitOrder(MSBFIRST);  //Define MSB as first (explicitly)
   SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
   delay(50);
   
-  //Write 0x00AD to Register Address 0x00FE. "This unlocks Register 0x120."
+  //Write 0x00AD to Register Address 0x00FE. "This unlocks Register 0x120." per datasheet
   digitalWrite(_SS, LOW);//Enable data transfer by bringing SS line LOW.
   SPI.transfer(0x00); //Pass in MSB of register 0x00FE first.
   SPI.transfer(0xFE); //Pass in LSB of register 0x00FE next.
-  SPI.transfer(WRITE);//This tells the ADE7953 that data is to be written to register 0x00FE.
-  SPI.transfer(0x00); //Pass in MSB of 0x00AD first to write to 0x00FE.
-  SPI.transfer(0xAD); //Pass in LSB of 0x00AD next to write to 0x00FE.
+  SPI.transfer(WRITE); //This tells the ADE7953 that data is to be written to register 0x00FE, per datasheet
+  SPI.transfer(0x00); //Pass in MSB of 0x00AD first to write to 0x00FE, per datasheet
+  SPI.transfer(0xAD); //Pass in LSB of 0x00AD next to write to 0x00FE, per datasheet
   
-  //Write 0x0030 to Register Address 0x0120. "This configures the optimum settings."
-  SPI.transfer(0x01); //Pass in MSB of register 0x0120 first.
-  SPI.transfer(0x20); //Pass in LSB of register 0x0120 next.
-  SPI.transfer(WRITE);//This tells the ADE7953 that data is to be written to register 0x0120.
-  SPI.transfer(0x00); //Pass in MSB of 0x0030 first to write to 0x0120.
-  SPI.transfer(0x30); //Pass in LSB of 0x0030 next to write to 0x0120.
+  //Write 0x0030 to Register Address 0x0120. "This configures the optimum settings." per datasheet
+  SPI.transfer(0x01); //Pass in MSB of register 0x0120 first, per datasheet
+  SPI.transfer(0x20); //Pass in LSB of register 0x0120 next, per datasheet
+  SPI.transfer(WRITE);//This tells the ADE7953 that data is to be written to register 0x0120, per datasheet
+  SPI.transfer(0x00); //Pass in MSB of 0x0030 first to write to 0x0120, per datasheet
+  SPI.transfer(0x30); //Pass in LSB of 0x0030 next to write to 0x0120, per datasheet
   SPI.endTransaction();
   digitalWrite(_SS, HIGH);//End data transfer by bringing SS line HIGH.
   delay(100);
@@ -367,7 +365,7 @@ void ADE7953::initialize(){
    Serial.print(" ADE7953:initialize function completed "); 
   #endif
   
-  //Calibrations
+  //Default Calibrations - Per Datasheet
   //spiAlgorithm16_write((functionBitVal(PHCALA_16,1)),(functionBitVal(PHCALA_16,0)),0x00,0x00);
   //delay(100);
   spiAlgorithm32_write((functionBitVal(AP_NOLOAD_32,1)),(functionBitVal(AP_NOLOAD_32,0)),0x00,0x00,0x00,0x01); //Check for ensuring read and write operations are okay
@@ -396,7 +394,6 @@ byte ADE7953::functionBitVal(int addr, uint8_t byteVal)
    Serial.print(x, HEX); 
    Serial.print(" ADE7953::functionBitVal function completed "); 
   #endif
-  
   return x;
 }
 
@@ -415,8 +412,8 @@ uint8_t ADE7953::spiAlgorithm8_read(byte MSB, byte LSB) { //This is the algorith
   SPI.transfer(READ); //Send command to begin readout
   one = (SPI.transfer(WRITE));  //MSB Byte 1  (Read in data on dummy write (null MOSI signal)) - only one needed as 1 byte
   two = (SPI.transfer(WRITE));  //"LSB "Byte 2?"  (Read in data on dummy write (null MOSI signal)) - only one needed as 1 byte, but it seems like it responses will send a byte back in 16 bit response total, likely this LSB is useless, but for timing it will be collected.  This may always be a duplicate of the first byte, 
-  SPI.endTransaction();
-  digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH
+  SPI.endTransaction(); //end SPI communication
+  digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH (device made inactive)
   
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print("ADE7953::spiAlgorithm8_read function details: ");
@@ -432,8 +429,7 @@ uint8_t ADE7953::spiAlgorithm8_read(byte MSB, byte LSB) { //This is the algorith
   #endif
   
   //Post-read packing and bitshifting operation
-    readval_unsigned = one;  //Process MSB (nothing much to see here for only one 8 bit value)
-  
+    readval_unsigned = one;  //Process MSB (nothing much to see here for only one 8 bit value - nothing to shift)
 	return readval_unsigned;  //uint8_t versus long because it is only an 8 bit value, function returns uint8_t.
  }
   
@@ -470,12 +466,11 @@ uint16_t ADE7953::spiAlgorithm16_read(byte MSB, byte LSB) { //This is the algori
   #endif
    
    //Post-read packing and bitshifting operation
-   //readval_unsigned = (((uint32_t) one << 8) + ((uint32_t) two));  //(Alternate bitshift algorithm)
-   
-   readval_unsigned = (one << 8);  //Process MSB  (Alternate bitshift algorithm)
+   readval_unsigned = (one << 8);  //Process MSB  (Bitshift algorithm)
    readval_unsigned = readval_unsigned + two;  //Process LSB
-			   
-			return readval_unsigned;	
+     
+   //readval_unsigned = (((uint32_t) one << 8) + ((uint32_t) two));  //Alternate Bitshift algorithm)
+   return readval_unsigned;	
     }
   
 
@@ -517,10 +512,9 @@ uint32_t ADE7953::spiAlgorithm24_read(byte MSB, byte LSB) { //This is the algori
   #endif
 
   //Post-read packing and bitshifting operation
-  readval_unsigned = (((uint32_t) one << 16)+ ((uint32_t) two << 8) + ((uint32_t) three)); //(Alternative shift algorithm)
-   
-
-   
+  readval_unsigned = (((uint32_t) one << 16)+ ((uint32_t) two << 8) + ((uint32_t) three)); //Shift algorithm
+      
+ //(Alternative Bitshift algorithm)
  // readval_unsigned =  ((one << 16) & 0x00FF0000);  //process MSB  //(Alternative shift algorithm)
  // readval_unsigned = readval_unsigned + ((two << 8) & 0X0000FF00);
  // readval_unsigned = readval_unsigned + (three & 0X000000FF);  //Process LSB
@@ -568,9 +562,10 @@ uint32_t ADE7953::spiAlgorithm32_read(byte MSB, byte LSB) { //This is the algori
    Serial.print(" ADE7953::spiAlgorithm32_read function completed "); 
   #endif
   
-  //Post-read packing and bitshifting operation
+  //Post-read packing and bitshifting operations
   readval_unsigned = (((uint32_t) one << 24)+ ((uint32_t) two << 16) + ((uint32_t) three << 8) + (uint32_t) four);
   
+  //Alternate Bitshifting approach
 /*   readval_unsigned = (one << 24);  //Process MSB 
   //Serial.println(readval_unsigned, HEX);  
   readval_unsigned = readval_unsigned + (two << 16);  
@@ -618,6 +613,7 @@ void ADE7953::spiAlgorithm32_write(byte MSB, byte LSB, byte onemsb, byte two, by
   #endif
   }
   
+  
   void ADE7953::spiAlgorithm24_write(byte MSB, byte LSB, byte onemsb, byte two, byte threelsb) { //This is the algorithm that writes to a register in the ADE7953. The arguments are the MSB and LSB of the address of the register respectively. The values of the arguments are obtained from the list of functions above.
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print(" spiAlgorithm24_write function started "); 
@@ -648,6 +644,7 @@ void ADE7953::spiAlgorithm32_write(byte MSB, byte LSB, byte onemsb, byte two, by
   #endif
   }
   
+  
 void ADE7953::spiAlgorithm16_write(byte MSB, byte LSB, byte onemsb, byte twolsb) { //This is the algorithm that writes to a register in the ADE7953. The arguments are the MSB and LSB of the address of the register respectively. The values of the arguments are obtained from the list of functions above.
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print(" spiAlgorithm16_write function started "); 
@@ -675,6 +672,7 @@ void ADE7953::spiAlgorithm16_write(byte MSB, byte LSB, byte onemsb, byte twolsb)
   #endif
   }
   
+  
 void ADE7953::spiAlgorithm8_write(byte MSB, byte LSB, byte onemsb) { //This is the algorithm that writes to a register in the ADE7953. The arguments are the MSB and LSB of the address of the register respectively. The values of the arguments are obtained from the list of functions above.
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print(" spiAlgorithm8_write function started "); 
@@ -699,10 +697,11 @@ void ADE7953::spiAlgorithm8_write(byte MSB, byte LSB, byte onemsb) { //This is t
   #endif
   }
   
-float ADE7953::decimalize(long input, float factor, float offset) //This function adds a decimal point to the input value and returns it as a float
+  
+float ADE7953::decimalize(long input, float factor, float offset) //This function adds a decimal point to the input value and returns it as a float, it also provides linear calibration (y=mx+b) by providing input in the following way as arguments (rawinput, gain, offset)
 {
   #ifdef ADE7953_VERBOSE_DEBUG
-   Serial.print("ADE7953::calibration function executed ");
+   Serial.print("ADE7953::calibration and float type conversion function executed ");
   #endif
 return ((float)input/factor)+offset;
 }
