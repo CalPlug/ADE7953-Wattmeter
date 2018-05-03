@@ -4,9 +4,11 @@ Example library for operating the ADE7953 Single-Phase AC Line measurement IC ov
 
 Created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
 
-PCB v1 and v2 Board design by Damien Putignani
+PCB v1 and v2 Board design by Damien Putignani (2016/2017)
 
-Version 3 PCB update by Yuxiang (Eric) Li	and Zihan (Bronco) Chen
+Version 3 PCB update by Yuxiang (Eric) Li	and Zihan (Bronco) Chen (11/2017)
+
+Version 4 PCB (SPI and I2C Variants) update by Andy Begley and Lifeng Lieng (5/2018)
 
 University of California, Irvine - California Plug Load Research Center (CalPlug)
 
@@ -14,7 +16,7 @@ February 23, 2017
 
 Copyright (C) The Regents of the University of California, 2017
 
-Released into the public domain. This is an example C++ library for Arduino for operating the ADE7953 Single-Phase AC Line measurement IC over SPI and tested with the Arduino Uno and C++ Arduino-style compiler for the Espressif ESP8266. 
+Released into the public domain. This is an example C++ library for Arduino for operating the ADE7953 Single-Phase AC Line measurement IC over SPI and tested with the Arduino Uno and C++ Arduino-style compiler for the Espressif ESP8266. This library in current form was shown to work with the Arduino Uno and the Espressif ESP8266.  See note below about Espressif ESP32 compatability.
 
 Installation
 --------------------------------------------------------------------------------
@@ -35,7 +37,6 @@ After this library is installed, you can start the Arduino application.
 You may see a few warning messages as it's built.
 To use this library in a sketch, go to the Sketch | Import Library menu and select Test. This will add a corresponding line to the top of your sketch: #include <ADE7953.h>
 To stop using this library, delete that line from your sketch.
-This library in current form was shown to work with the Arduino Uno and the Espressif ESP8266.  See note below about ESP32 compatability.
 
 Background of Operation
 --------------------------------------------------------------------------------
