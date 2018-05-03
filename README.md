@@ -35,6 +35,7 @@ After this library is installed, you can start the Arduino application.
 You may see a few warning messages as it's built.
 To use this library in a sketch, go to the Sketch | Import Library menu and select Test. This will add a corresponding line to the top of your sketch: #include <ADE7953.h>
 To stop using this library, delete that line from your sketch.
+This library in current form was shown to work with the Arduino Uno and the Espressif ESP8266.  See note below about ESP32 compatability.
 
 Background of Operation
 --------------------------------------------------------------------------------
@@ -62,6 +63,8 @@ Active Power A (mW): 80000
 Reactive Power A (mW): 4100
 
 Power Factor (div 100): 99.90
+
+A varient of this project's code was shown to work on the Espressif ESP32, please see this project for more details:  https://github.com/CalPlug/EVSE_Smart_Charger
 
 Active Energy A (hex): 5132 
 
