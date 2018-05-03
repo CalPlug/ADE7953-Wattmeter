@@ -1,0 +1,41 @@
+1) Populate all components, double check directions for the population, make notes to help with population as needed that can assist others to assist you.  Go easy on the solder for the QFN package IC (U1 on the schematic). You can use a touch more solder paste for the rest of the parts than previously used.  Take pictures as you assemble the next one as a guide.  Use the microscope for shots also.
+
+
+
+2) After baking to fuse solder paste, put board under microscope and fully re-inspect all parts for good solder joints and proper component orientation. Especially inspect QFN package for solder quality at its edges. 
+
+
+
+3) If necessary, stilt and mount remaining components that cause interference issues (like U5 on the schematic. We need to see if we can find smaller packages that can properly fit). 
+
+
+
+4) Plug board into 3.3V source to power with no other connections.  Power draw should be substantially less than 0.75mA at 3.3V.  If this is not the case, components are likely mis-populated or bad, check component orientations and retest.  If anything is getting hot, check its orientation or replace, if a board continues to fail this test, kick it out and notify Mike or myself.  Mis-populated parts caused problems intitially for this design, verify everything multiple times.
+
+
+
+5) Check voltage at the isolated bus between isolated ground and isolated V+, this should be 3.3V  
+
+
+
+6) Using a good oscilloscope (not the pocket one). Verify the oscillation of the on-board crystal oscillator by measuring between isolated ground and each side of the crystal.  Oscillation should produce a nice sine wave at approximately 3.7 MHz between 0.5 and 3V in p-p amplitude. 
+
+
+
+7) Test the IRQ and RESET isolation circuits by directly testing the reset.  Verify the line from the optoisolator for RESET to the chip is HIGH in normal intended operation.  IRQ is currently unused, we will come up with a testing plan for this next.  
+
+
+
+8) Setup the I2C demo circuit and arduino code, verify I2C communication "pulses" on the SDA and SCL line feeding the board.  This code just tries to set up the IC for communication in a rapid loop.  On the isolated side, (grounding the scope to the isolated ground) look for "false response bit". This is a tell tale sign the chip is trying to respond to the input (with an ACK) but this return signal is being blocked by the unidirectional isolator.  This is proof positive the chip is operational and responding to input.  This is a quick check to verify IC is operational.  Until further notice, use external 3.3V power supply.  Verify 3.3V is outputted stability before connecting board.
+
+
+
+9) Perform the modification to swap the MISO and CS pins on both sides of the isolator (more details here to follow after we try this for the first one).
+
+
+
+10) Connect Board in SPI test setup with Arduino.  Use the code that reports "silicon version" "period" and "RMSvoltage" Connect function generator outputting 60 hz, 5V at 0V offset into the blue screw header.  Change frequency from 30 to 100 Hz, verify the period value changes accordingly.  This is the final QC step currently, more will follow once we begin calibration.
+
+
+
+You should be familiar with all the steps except 8, 9, and, 10. I will show those three steps to you in person, but get started with the steps before that. Have a USB flash drive with you so that you can save waveforms as JPEGs from the oscilloscope.
