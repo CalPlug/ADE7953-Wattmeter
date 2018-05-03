@@ -1,7 +1,9 @@
 /*
- ADE7953.cpp - Simple library for operating the ADE7953 Single-Phase AC Line measurement IC over SPI for Arduino Uno 
+ ADE7953.cpp - Example library for operating the ADE7953 Single-Phase AC Line measurement IC over SPI for Arduino Uno 
   Created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
-  January 23, 2017 - v6.2 (pre-release)
+  January 23, 2017 - 0.1 (pre-release)
+  May 3, 2018 - v6.2 (current version) 
+  Verified for compatability with Arduino Uno and Espressif ESP8266, please see Readme about ESP32 compatability.
   University of California, Irvine - California Plug Load Research Center (CalPlug)
   Released into the public domain.
 */
