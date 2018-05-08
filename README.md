@@ -16,7 +16,8 @@ February 23, 2017 - Library First Release
 
 Copyright (C) The Regents of the University of California, 2017
 
-Released into the public domain. This is an example C++ library for Arduino for operating the ADE7953 Single-Phase AC Line measurement IC over SPI and tested with the Arduino Uno and C++ Arduino-style compiler for the Espressif ESP8266. This library in current form was shown to work with the Arduino Uno and the Espressif ESP8266.  See note below about Espressif ESP32 compatability.
+
+Released into the public domain under creative commons share-alike license. This is an example C++ library for Arduino for operating the ADE7953 Single-Phase AC Line measurement IC over SPI and tested with the Arduino Uno and C++ Arduino-style compiler for the Espressif ESP8266. This library in current form was shown to work with the Arduino Uno and the Espressif ESP8266.  See note below about Espressif ESP32 compatability.  
 
 Installation
 --------------------------------------------------------------------------------
@@ -72,7 +73,9 @@ Active Energy A (hex): 5132
 
 Physical Demo Board
 ----------
-This folder contains all the files required to construct a fully isolated ADE7953 wattmeter board that uses SPI or UART communication (see IC Datasheet). Please refer to the README inside the folder for more details on using the files.  The Version 3 supercedes the Version 2 board.  In the Version 2 revision, there is no tri-state on the MISO line on the external side of the chipset. Because of this, the board works properly when it is the only device on the SPI bus. If more devices are used on the same SPI bus, the CS line (inverted) must be used to drive a tristate to isolate the MISO line from this board.  
+This design is provided without any warranty or assumption of liability.  This project involves the use of mains voltage.  We have no idea how well you can reporduce this design:  we assume no liability for your mistakes! Please construct and use at your own risk.
+
+This folder contains all the files required to construct a fully isolated ADE7953 wattmeter board that uses SPI or UART communication (see IC Datasheet). Please refer to the README inside the folder for more details on using the files.  The Version 3 supercedes the Version 2 board.  In the Version 2 revision, there is no tri-state on the MISO line on the external side of the chipset. Because of this, the board works properly when it is the only device on the SPI bus. If more devices are used on the same SPI bus, the CS line (inverted) must be used to drive a tristate to isolate the MISO line from this board.  The RESET and IRQ lines can be left unconnected for general operation of the board - the ADE7953 reset line is held HIGH by a pullup by default.  The minimum connections required are the data and power lines.
 
 The Version 2 board has the neutral connected to the isolated ground.  In bench testing, this design worked well, but in general usage, several catostrophic board failures resulted (not that crazy on our part: look at how the Analog Devices datasheet and AD demo boards are wired :) ).  Accordingly, a safer design was developed (Version 3).  As previously stated, the Version 2 of the board does not allow for multiple devices to be used on the SPI as the MISO line is held low when communication has ended (the isolator is always enabled, causing this).  In the updated version 3, a tri-state buffer allows proper SPI usage with multiple devices and resistor chains are used to isolate the neutral from the ground in case of the neutral having the voltage become raised substantially above thr ground (or flipped with the line).
 
