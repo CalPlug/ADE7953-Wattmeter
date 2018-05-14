@@ -8,7 +8,7 @@ PCB v1 and v2 Board design by Damien Putignani (11/2016, 02/2017)
 
 Version 3 PCB update by Yuxiang (Eric) Li	and Zihan (Bronco) Chen (11/2017)
 
-Version 4 PCB (SPI and I2C Variants) update by Andy Begley and Lifeng Lieng (5/2018)
+Version 4 PCB (SPI and I2C Variants) update by Andy Begley and Lifeng Liang (5/2018)
 
 University of California, Irvine - California Plug Load Research Center (CalPlug)
 
