@@ -6,15 +6,10 @@ Created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
 
 ESP32 Extension Development by Luis Contreras as part of the CalPlug EVSE Project - https://github.com/CalPlug/EVSE_Smart_Charger
 
-
-PCB v1 and v2 Board design by Damien Putignani
-
-Version 3 PCB update by Yuxiang (Eric) Li	and Zihan (Bronco) Chen
-
 University of California, Irvine - California Plug Load Research Center (CalPlug)
 
 February 23, 2017 - first version
-
+May 14, 2018 - Version 1.0 for ESP32 Version
 
 Copyright (C) The Regents of the University of California, 2017
 
@@ -72,7 +67,4 @@ Active Energy A (hex): 5132
 
 Physical Demo Board
 ----------
-This folder contains all the files required to construct an isolated ADE7953 wattmeter board. Please refer to the README inside the folder for more details on using the files.  The version 3 supercedes the version 2 board.  In the Version 2 revision, there is no tri-state on the MISO line on the external side of the chipset. Because of this, the board works properly when it is the only device on the SPI bus. If more devices are used on the same SPI bus, the CS line (inverted) must be used to drive a tristate to isolate the MISO line from this board.  
-
-The Version 2 board has the neutral connected to the isolated ground.  In bench testing, this design worked well, but in general usage, several catostrophic board failures resulted (not that crazy, look at how the AD datasheet and AD demo boards are wired :) ).  Accordingly, a safer design was developed (version 3).  As previously stated, the version 2 of the board does not allow for multiple devices to be used on the SPI as the MISO line is held low when communication has ended (the isolator is always enabled, causing this).  In the updated version 3, a tri-state buffer allows proper SPI usage with multiple devices.
-
+See Arduino/ESP8266 Example firmware for details
