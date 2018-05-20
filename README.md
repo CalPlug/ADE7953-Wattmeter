@@ -8,6 +8,8 @@ PCB v1 and v2 Board design by Damien Putignani (11/2016, 02/2017)
 
 Version 3 PCB update by Yuxiang (Eric) Li	and Zihan (Bronco) Chen (11/2017)
 
+Version 3.1 PCB update by Erica Deng (05/2018) - Isolation correction
+
 Version 4 PCB (SPI and I2C Variants) update by Andy Begley and Lifeng Liang (5/2018)
 
 University of California, Irvine - California Plug Load Research Center (CalPlug)
@@ -18,7 +20,7 @@ Copyright (C) The Regents of the University of California, 2018
 
 
 Released into the public domain under creative commons share-alike license. This is an example C++ library for Arduino for operating the ADE7953 Single-Phase AC Line measurement IC over SPI and tested with the Arduino Uno and C++ Arduino-style compiler for the Espressif ESP8266. This library in current form was shown to work with the Arduino Uno and the Espressif ESP8266.  See note below about Espressif ESP32 compatability - a working example is provided isn the ESP32 folder in this project.  This ESP32 extension example was developed by Luis Contreras as part of the CalPlug EVSE Project - https://github.com/CalPlug/EVSE_Smart_Charger and presented in this project as functional example working with the ESP32.
-.  
+ 
 
 Installation
 --------------------------------------------------------------------------------
