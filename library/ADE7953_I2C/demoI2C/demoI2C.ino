@@ -6,10 +6,9 @@
 #include <Wire.h>
 
 //Define ADE7953 object with hardware parameters specified
-//#define local_SPI_freq 1000000  //Set SPI_Freq at 1MHz (#define, (no = or ;) helps to save memory)
-//#define local_SS 10  //Set the SS pin for SPI communication as pin 10  (#define, (no = or ;) helps to save memory)
-#define local_CLK 12
-#define local_CS 13
+//Both CLK and CS pin has to be set in HIGH in order to make ADE7953 communicate in I2C protocol
+#define local_CLK 12  //Set the CLK pin for I2C communication as pin 12
+#define local_CS 13   //Set the CS pin for I2C communication as pin 13
 /*  Call the ADE7953 Object with hardware parameters specified,  */
 /*  the "local" lets us use the same parameters for examples in  */
 /*  this program as what is assigned to the ADE7953 object       */
@@ -18,15 +17,12 @@ ADE7953 myADE7953(local_CLK, local_CS);
 void setup() {
   Serial.begin(115200);
   delay(200);
- // Wire.begin();
-  //delay(200);
   myADE7953.initialize();   //The ADE7953 must be initialized once in setup.
 }
 
 //int count;
 
 void loop() {
-  Serial.print("\nIIIIIIIIIIIIn the loop\n");
   long apnoload, activeEnergyA;
   float vRMS, iRMSA, powerFactorA, apparentPowerA, reactivePowerA, activePowerA;
 
