@@ -11,7 +11,7 @@
 #include <Wire.h>
 #include "ADE7953_I2C.h"
 //#define ADE7953_VERBOSE_DEBUG //This line turns on verbose debug via serial monitor (Normally off or //'ed).  Use sparingly and in a test program!  Turning this on can take a lot of memory!  This is non-specific and for all functions, beware, it's a lot of output!  Reported bytes are in HEX
-int ADE_Address = 56;//I2C Address of ADE7953
+int ADE_Address = 56;//I2C Address of ADE7953, or using equivalent value in hex: 0x38 
 
 
 
@@ -336,67 +336,41 @@ void ADE7953::initialize(){
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print("ADE7953:initialize function started \n"); 
   #endif
-
-/*   pinMode(_SS, OUTPUT); // FYI: SS is pin 10 by Arduino's SPI library, set SS pin as Output
-  digitalWrite(_SS, HIGH); //Initialize pin as HIGH
-  SPI.begin();
-  delay(50);
-  SPI.setBitOrder(MSBFIRST);  //Define MSB as first (explicitly)
-  SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  delay(50); */
   
   Wire.begin();
-  delay(1);
-  pinMode(_CS, OUTPUT);
+  delay(50);
+  pinMode(_CS, OUTPUT);  
   pinMode(_CLK, OUTPUT); 
   digitalWrite(_CS, HIGH);// set CS & CLK pin HIGH for autodection of ADE7953 in I2C communication mode
   digitalWrite(_CLK, HIGH);
 
-  delay(1);
+  delay(50);
   
-  /*LOCKING THE COMMUNICATION INTERFACE*/
+  //LOCKING THE COMMUNICATION INTERFACE
   Wire.beginTransmission(ADE_Address);
   Wire.write(0x01);//Address 0x102, MSB first
   Wire.write(0x02);
-  Wire.write(0x00);//COMM_LOCK is bit 15, default is 1, need to be set to 0 to lock the communication interface.
+  Wire.write(0x20);//COMM_LOCK is bit 15, default is 1, need to be set to 0 to lock the communication interface. Keep the other bits in its default setup value.
   Wire.write(0x00);
   Wire.endTransmission();
   delayMicroseconds(5);//Bus-free time minimum 4.7us
   
   
   
-/*   Write 0x00AD to Register Address 0x00FE. "This unlocks Register 0x120."
-  digitalWrite(_SS, LOW);//Enable data transfer by bringing SS line LOW.
-  SPI.transfer(0x00); //Pass in MSB of register 0x00FE first.
-  SPI.transfer(0xFE); //Pass in LSB of register 0x00FE next.
-  SPI.transfer(WRITE);//This tells the ADE7953 that data is to be written to register 0x00FE.
-  SPI.transfer(0x00); //Pass in MSB of 0x00AD first to write to 0x00FE.
-  SPI.transfer(0xAD); //Pass in LSB of 0x00AD next to write to 0x00FE. */
-  
   Wire.beginTransmission(ADE_Address);
-  Wire.write(0x00);//Address 0xFE, MSB first
-  Wire.write(0xFE);
+  Wire.write(0x00);	//Pass in MSB of register 0x00FE first.
+  Wire.write(0xFE);	//Pass in LSB of register 0x00FE next.
   Wire.write(0x00);
   Wire.write(0xAD);
   Wire.endTransmission();
   delayMicroseconds(5);//Bus-free time minimum 4.7us
   
   
-  
-/*   Write 0x0030 to Register Address 0x0120. "This configures the optimum settings."
-  SPI.transfer(0x01); //Pass in MSB of register 0x0120 first.
-  SPI.transfer(0x20); //Pass in LSB of register 0x0120 next.
-  SPI.transfer(WRITE);//This tells the ADE7953 that data is to be written to register 0x0120.
-  SPI.transfer(0x00); //Pass in MSB of 0x0030 first to write to 0x0120.
-  SPI.transfer(0x30); //Pass in LSB of 0x0030 next to write to 0x0120.
-  SPI.endTransaction();
-  digitalWrite(_SS, HIGH);//End data transfer by bringing SS line HIGH. */
-  
   Wire.beginTransmission(ADE_Address);
-  Wire.write(0x01);
-  Wire.write(0x20);
-  Wire.write(0x00);
-  Wire.write(0x30);
+  Wire.write(0x01); //Pass in MSB of register 0x0120 first.
+  Wire.write(0x20);	//Pass in LSB of register 0x0120 next.
+  Wire.write(0x00); //Pass in MSB of 0x0030 first to write to 0x0120.
+  Wire.write(0x30); //Pass in LSB of 0x0030 next to write to 0x0120.
   Wire.endTransmission(); 
   delayMicroseconds(5);//Bus-free time minimum 4.7us
   
@@ -405,7 +379,7 @@ void ADE7953::initialize(){
   #endif
   
   //Calibrations
-  //spiAlgorithm16_write((functionBitVal(PHCALA_16,1)),(functionBitVal(PHCALA_16,0)),0x00,0x00);
+  //i2cAlgorithm16_write((functionBitVal(PHCALA_16,1)),(functionBitVal(PHCALA_16,0)),0x00,0x00);
   //delay(100);
   i2cAlgorithm32_write((functionBitVal(AP_NOLOAD_32,1)),(functionBitVal(AP_NOLOAD_32,0)),0x00,0x00,0x00,0x01); //Check for ensuring read and write operations are okay
   delay(100);
@@ -417,8 +391,7 @@ void ADE7953::initialize(){
 }
 //**************************************************
 
-byte ADE7953::functionBitVal(int addr, uint8_t byteVal)
-{
+byte ADE7953::functionBitVal(int addr, uint8_t byteVal){
 //Returns as integer an address of a specified byte - basically a byte controlled shift register with "byteVal" controlling the byte that is read and returned
   int x = ((addr >> (8*byteVal)) & 0xff);
   #ifdef ADE7953_VERBOSE_DEBUG
@@ -448,11 +421,13 @@ uint8_t ADE7953::i2cAlgorithm8_read(byte MSB, byte LSB) { //This is the algorith
   Wire.beginTransmission(ADE_Address);
   Wire.write(MSB);
   Wire.write(LSB); 
-  //Wire.endTransmission(0);//prevent bus being taken from other devices
-  Wire.requestFrom(ADE_Address,1);	//Request 1 Byte from the specified address
-  while(Wire.available() == 0);	//Wait for response
-  one = Wire.read();
+  Wire.endTransmission(0);
   
+  Wire.requestFrom(ADE_Address,1);	//Request 1 Byte from the specified address
+  if(Wire.available() >= 1){	//Wait for response
+  one = Wire.read();
+  }
+  //Wire.endTransmission();//prevent bus being taken from other devices
   
     #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print("\nADE7953::i2cAlgorithm8_read function details: ");
@@ -473,33 +448,25 @@ uint8_t ADE7953::i2cAlgorithm8_read(byte MSB, byte LSB) { //This is the algorith
 
 uint16_t ADE7953::i2cAlgorithm16_read(byte MSB, byte LSB) { //This is the algorithm that reads from a register in the ADE7953. The arguments are the MSB and LSB of the address of the register respectively. The values of the arguments are obtained from the list of functions above.
   #ifdef ADE7953_VERBOSE_DEBUG
-   Serial.print("\nADE7953::spiAlgorithm16_read function started "); 
+   Serial.print("\nADE7953::i2cAlgorithm16_read function started "); 
   #endif
   uint16_t readval_unsigned = 0;  //This variable is the unsigned integer value to compile read bytes into (if needed)
   byte one;
   byte two;
-/*   digitalWrite(_SS, LOW);  //Enable data transfer by bringing SS line LOW
-  SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  SPI.transfer(MSB);  //Pass in MSB of register to be read first.
-  SPI.transfer(LSB);  //Pass in LSB of register to be read next.
-  //Read in values sequentially and bitshift for a 32 bit entry
-  SPI.transfer(READ); //Send command to begin readout
-  one = SPI.transfer(WRITE);  //MSB Byte 1  (Read in data on dummy write (null MOSI signal))
-  two = SPI.transfer(WRITE);  //LSB Byte 2  (Read in data on dummy write (null MOSI signal))
-  SPI.endTransaction();
-  digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH */
   
   Wire.beginTransmission(ADE_Address);
-  Wire.write(MSB);
+  Wire.write(MSB);//Pass in MSB first 
   Wire.write(LSB); 
-  //Wire.endTransmission(0);//prevent bus being taken from other devices
+  Wire.endTransmission(0);//prevent bus being taken from other devices
   Wire.requestFrom(ADE_Address,2);	//Request 2 Byte from the specified address
-  while(Wire.available() == 0);	//Wait for response
+  if (2 <= Wire.available()) { // if two bytes were received
   one = Wire.read();//read MSB 
   two = Wire.read();//read LSB
+  }
+  
   
   #ifdef ADE7953_VERBOSE_DEBUG
-   Serial.print("\nADE7953::spiAlgorithm16_read function details: ");
+   Serial.print("\nADE7953::i2cAlgorithm16_read function details: ");
    Serial.print("\nAddress Byte 1(MSB)[HEX]: ");  
    Serial.print(MSB, HEX);
    Serial.print("\n Address Byte 2(LSB)[HEX]: ");  
@@ -508,7 +475,7 @@ uint16_t ADE7953::i2cAlgorithm16_read(byte MSB, byte LSB) { //This is the algori
    Serial.print(one, HEX);
    Serial.print(" ");
    Serial.print(two, HEX);
-   Serial.print("\n ADE7953::spiAlgorithm16_read function completed "); 
+   Serial.print("\n ADE7953::i2cAlgorithm16_read function completed "); 
   #endif
    
    //Post-read packing and bitshifting operation
@@ -522,37 +489,28 @@ uint16_t ADE7953::i2cAlgorithm16_read(byte MSB, byte LSB) { //This is the algori
 
 uint32_t ADE7953::i2cAlgorithm24_read(byte MSB, byte LSB) { //This is the algorithm that reads from a register in the ADE7953. The arguments are the MSB and LSB of the address of the register respectively. The values of the arguments are obtained from the list of functions above.
   #ifdef ADE7953_VERBOSE_DEBUG
-   Serial.print("\nADE7953::spiAlgorithm24_read function started "); 
+   Serial.print("\nADE7953::i2cAlgorithm24_read function started "); 
   #endif 
   //long readval_signed=0;
   uint32_t readval_unsigned = 0;  //This variable is the unsigned integer value to compile read bytes into (if needed)
   byte one;
   byte two;
   byte three;
-/*   digitalWrite(_SS, LOW);  //Enable data transfer by bringing SS line LOW
-  SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  SPI.transfer(MSB);  //Pass in MSB of register to be read first.
-  SPI.transfer(LSB);  //Pass in LSB of register to be read next.
-  //Read in values sequentially and bitshift for a 32 bit entry
-  SPI.transfer(READ); //Send command to begin readout
-  one= SPI.transfer(WRITE); //MSB Byte 1  (Read in data on dummy write (null MOSI signal))
-  two= SPI.transfer(WRITE);   // (Read in data on dummy write (null MOSI signal))
-  three= SPI.transfer(WRITE); //LSB Byte 3  (Read in data on dummy write (null MOSI signal))
-  SPI.endTransaction();
-  digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH */
+
   Wire.beginTransmission(ADE_Address);
-  Wire.write(MSB);
+  Wire.write(MSB);//Pass in MSB of register first
   Wire.write(LSB); 
-  //Wire.endTransmission(0);//prevent bus being taken from other devices
+  Wire.endTransmission(0);//prevent bus being taken from other devices
   Wire.requestFrom(ADE_Address,3);	//Request 3 Byte from the specified address
-  while(Wire.available() == 0);	//Wait for response
+  if (3 <= Wire.available()) { // if three bytes were received
   one = Wire.read();//read MSB 
   two = Wire.read();
   three = Wire.read();//read LSB
+  }
   
   
  #ifdef ADE7953_VERBOSE_DEBUG
-   Serial.print("\nADE7953::spiAlgorithm24_read function details: ");
+   Serial.print("\nADE7953::i2cAlgorithm24_read function details: ");
    Serial.print("\nAddress Byte 1(MSB)[HEX]: ");  
    Serial.print(MSB, HEX);
    Serial.print(" Address Byte 2(LSB)[HEX]: ");  
@@ -563,7 +521,7 @@ uint32_t ADE7953::i2cAlgorithm24_read(byte MSB, byte LSB) { //This is the algori
    Serial.print(two, HEX);
    Serial.print(" ");
    Serial.print(three, HEX);
-   Serial.print("\n ADE7953::spiAlgorithm24_read function completed "); 
+   Serial.print("\n ADE7953::i2cAlgorithm24_read function completed "); 
   #endif
 
   //Post-read packing and bitshifting operation
@@ -580,38 +538,29 @@ uint32_t ADE7953::i2cAlgorithm24_read(byte MSB, byte LSB) { //This is the algori
   
 uint32_t ADE7953::i2cAlgorithm32_read(byte MSB, byte LSB) { //This is the algorithm that reads from a 32 bit register in the ADE7953. The arguments are the MSB and LSB of the address of the register respectively. The values of the arguments are obtained from the list of functions above.  Caution, some register elements contain information that is only 24 bit with padding on the MSB
   #ifdef ADE7953_VERBOSE_DEBUG
-   Serial.print("\nADE7953::spiAlgorithm32_read function started "); 
+   Serial.print("\nADE7953::i2cAlgorithm32_read function started "); 
   #endif 
   uint32_t readval_unsigned = 0;  //This variable is the unsigned integer value to compile read bytes into (if needed)
   byte one;
   byte two;
   byte three;
   byte four;
-/*   digitalWrite(_SS, LOW);  //Enable data transfer by bringing SS line LOW
-  SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  SPI.transfer(MSB);  //Pass in MSB of register to be read first.
-  SPI.transfer(LSB);  //Pass in LSB of register to be read next.
-  //Read in values sequentially and bitshift for a 32 bit entry
-  SPI.transfer(READ); //Send command to begin readout
-  one= SPI.transfer(WRITE); //MSB Byte 1  (Read in data on dummy write (null MOSI signal))
-  two= SPI.transfer(WRITE);   // (Read in data on dummy write (null MOSI signal))
-  three= SPI.transfer(WRITE);   // (Read in data on dummy write (null MOSI signal))
-  four= SPI.transfer(WRITE); //LSB Byte 4  (Read in data on dummy write (null MOSI signal))
-  SPI.endTransaction();
-  digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH */ 
+
   Wire.beginTransmission(ADE_Address);
   Wire.write(MSB);
   Wire.write(LSB); 
-  //Wire.endTransmission(0);//prevent bus being taken from other devices
+  Wire.endTransmission(0);//prevent bus being taken from other devices
   Wire.requestFrom(ADE_Address,4);	//Request 4 Byte from the specified address
-  while(Wire.available() == 0);	//Wait for response
+  if (4 <= Wire.available()) {	//Wait for response
   one = Wire.read();//read MSB 
   two = Wire.read();
   three = Wire.read();
   four = Wire.read();//read LSB
+  }
+ 
   
   #ifdef ADE7953_VERBOSE_DEBUG
-   Serial.print("\nADE7953::spiAlgorithm32_read function details: ");
+   Serial.print("\nADE7953::i2cAlgorithm32_read function details: ");
    //Serial.print("Address Byte 1(MSB)[HEX]: ");  
    //Serial.print(MSB, BIN);
    //Serial.print(" Address Byte 2(LSB)[HEX]: ");  
@@ -624,7 +573,7 @@ uint32_t ADE7953::i2cAlgorithm32_read(byte MSB, byte LSB) { //This is the algori
    Serial.print(three, BIN);
    Serial.print(" ");
    Serial.print(four, BIN);
-   Serial.print("\n ADE7953::spiAlgorithm32_read function completed "); 
+   Serial.print("\n ADE7953::i2cAlgorithm32_read function completed "); 
   #endif
   
   //Post-read packing and bitshifting operation
@@ -645,19 +594,9 @@ uint32_t ADE7953::i2cAlgorithm32_read(byte MSB, byte LSB) { //This is the algori
 
 void ADE7953::i2cAlgorithm32_write(byte MSB, byte LSB, byte onemsb, byte two, byte three, byte fourlsb) { //This is the algorithm that writes to a register in the ADE7953. The arguments are the MSB and LSB of the address of the register respectively. The values of the arguments are obtained from the list of functions above.
   #ifdef ADE7953_VERBOSE_DEBUG
-   Serial.print("\n spiAlgorithm32_write function started "); 
+   Serial.print("\n i2cAlgorithm32_write function started "); 
   #endif 
-  /* digitalWrite(_SS, LOW);  //Enable data transfer by bringing SS line LOW
-  SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  SPI.transfer(MSB);  //Pass in MSB of register to be read first.
-  SPI.transfer(LSB);  //Pass in LSB of register to be read next.
-  // Send the Write command
-  SPI.transfer(WRITE);
-  SPI.transfer(onemsb);
-  SPI.transfer(two);
-  SPI.transfer(three);
-  SPI.transfer(fourlsb);
-  digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH */
+ 
   Wire.beginTransmission(ADE_Address);
   Wire.write(MSB);
   Wire.write(LSB); 
@@ -669,7 +608,7 @@ void ADE7953::i2cAlgorithm32_write(byte MSB, byte LSB, byte onemsb, byte two, by
 
   
   #ifdef ADE7953_VERBOSE_DEBUG
-   Serial.print("\nADE7953::spiAlgorithm32_read function details: ");
+   Serial.print("\nADE7953::i2cAlgorithm32_read function details: ");
    Serial.print("\nAddress Byte 1(MSB)[HEX]: ");  
    Serial.print(MSB, HEX);
    Serial.print("\n Address Byte 2(LSB)[HEX]: ");  
@@ -682,24 +621,15 @@ void ADE7953::i2cAlgorithm32_write(byte MSB, byte LSB, byte onemsb, byte two, by
    Serial.print(three, HEX);
    Serial.print(" ");
    Serial.print(fourlsb, HEX);
-   Serial.print("\n spiAlgorithm32_write function completed "); 
+   Serial.print("\n i2cAlgorithm32_write function completed "); 
   #endif
 }
   
 void ADE7953::i2cAlgorithm24_write(byte MSB, byte LSB, byte onemsb, byte two, byte threelsb) { //This is the algorithm that writes to a register in the ADE7953. The arguments are the MSB and LSB of the address of the register respectively. The values of the arguments are obtained from the list of functions above.
   #ifdef ADE7953_VERBOSE_DEBUG
-   Serial.print("\n spiAlgorithm24_write function started "); 
+   Serial.print("\n i2cAlgorithm24_write function started "); 
   #endif
-/*   digitalWrite(_SS, LOW);  //Enable data transfer by bringing SS line LOW
-  SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  SPI.transfer(MSB);  //Pass in MSB of register to be read first.
-  SPI.transfer(LSB);  //Pass in LSB of register to be read next.
-  //Send the Write command
-  SPI.transfer(WRITE);
-  SPI.transfer(onemsb);
-  SPI.transfer(two);
-  SPI.transfer(threelsb);
-  digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH */
+
   Wire.beginTransmission(ADE_Address);
   Wire.write(MSB);
   Wire.write(LSB); 
@@ -709,7 +639,7 @@ void ADE7953::i2cAlgorithm24_write(byte MSB, byte LSB, byte onemsb, byte two, by
   Wire.endTransmission();//release bus for other devices
   
   #ifdef ADE7953_VERBOSE_DEBUG
-   Serial.print("\nADE7953::spiAlgorithm24_read function details: ");
+   Serial.print("\nADE7953::i2cAlgorithm24_read function details: ");
    Serial.print("\nAddress Byte 1(MSB)[HEX]: ");  
    Serial.print(MSB, HEX);
    Serial.print("\n Address Byte 2(LSB)[HEX]: ");  
@@ -720,23 +650,15 @@ void ADE7953::i2cAlgorithm24_write(byte MSB, byte LSB, byte onemsb, byte two, by
    Serial.print(two, HEX);
    Serial.print(" ");
    Serial.print(threelsb, HEX);
-   Serial.print("\n spiAlgorithm24_write function completed "); 
+   Serial.print("\n i2cAlgorithm24_write function completed "); 
   #endif
   }
   
 void ADE7953::i2cAlgorithm16_write(byte MSB, byte LSB, byte onemsb, byte twolsb) { //This is the algorithm that writes to a register in the ADE7953. The arguments are the MSB and LSB of the address of the register respectively. The values of the arguments are obtained from the list of functions above.
   #ifdef ADE7953_VERBOSE_DEBUG
-   Serial.print("\n spiAlgorithm16_write function started "); 
+   Serial.print("\n i2cAlgorithm16_write function started "); 
   #endif
-/*   digitalWrite(_SS, LOW);  //Enable data transfer by bringing SS line LOW
-  SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  SPI.transfer(MSB);  //Pass in MSB of register to be read first.
-  SPI.transfer(LSB);  //Pass in LSB of register to be read next.
-  //Send the Write command
-  SPI.transfer(WRITE);
-  SPI.transfer(onemsb);
-  SPI.transfer(twolsb);
-  digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH */
+
   Wire.beginTransmission(ADE_Address);
   Wire.write(MSB);
   Wire.write(LSB); 
@@ -745,7 +667,7 @@ void ADE7953::i2cAlgorithm16_write(byte MSB, byte LSB, byte onemsb, byte twolsb)
   Wire.endTransmission();//release bus for other devices
   
   #ifdef ADE7953_VERBOSE_DEBUG
-   Serial.print("\nADE7953::spiAlgorithm16_read function details: ");
+   Serial.print("\nADE7953::i2cAlgorithm16_read function details: ");
    Serial.print("\nAddress Byte 1(MSB)[HEX]: ");  
    Serial.print(MSB, HEX);
    Serial.print("\n Address Byte 2(LSB)[HEX]: ");  
@@ -754,22 +676,15 @@ void ADE7953::i2cAlgorithm16_write(byte MSB, byte LSB, byte onemsb, byte twolsb)
    Serial.print(onemsb, HEX);
    Serial.print(" ");
    Serial.print(twolsb, HEX);
-   Serial.print("\n spiAlgorithm16_write function completed "); 
+   Serial.print("\n i2cAlgorithm16_write function completed "); 
   #endif
   }
   
 void ADE7953::i2cAlgorithm8_write(byte MSB, byte LSB, byte onemsb) { //This is the algorithm that writes to a register in the ADE7953. The arguments are the MSB and LSB of the address of the register respectively. The values of the arguments are obtained from the list of functions above.
   #ifdef ADE7953_VERBOSE_DEBUG
-   Serial.print("\n spiAlgorithm8_write function started "); 
+   Serial.print("\n i2cAlgorithm8_write function started "); 
   #endif
-/*   digitalWrite(_SS, LOW);  //Enable data transfer by bringing SS line LOW
-  SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  SPI.transfer(MSB);  //Pass in MSB of register to be read first.
-  SPI.transfer(LSB);  //Pass in LSB of register to be read next.
-  //Send the Write command
-  SPI.transfer(WRITE);
-  SPI.transfer(onemsb);
-  digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH */
+
   Wire.beginTransmission(ADE_Address);
   Wire.write(MSB);
   Wire.write(LSB); 
@@ -777,14 +692,14 @@ void ADE7953::i2cAlgorithm8_write(byte MSB, byte LSB, byte onemsb) { //This is t
   Wire.endTransmission();//release bus for other devices
   
   #ifdef ADE7953_VERBOSE_DEBUG
-   Serial.print("\nADE7953::spiAlgorithm8_read function details: ");
+   Serial.print("\nADE7953::i2cAlgorithm8_read function details: ");
    Serial.print("\nAddress Byte 1(MSB)[HEX]: ");  
    Serial.print(MSB, HEX);
    Serial.print("\n Address Byte 2(LSB)[HEX]: ");   
    Serial.print(LSB, HEX);
    Serial.print("\n Written bytes (1 of 1)[HEX]: ");  //MSB to LSB order
    Serial.print(onemsb, HEX);
-   Serial.print("\n spiAlgorithm16_write function completed "); 
+   Serial.print("\n i2cAlgorithm16_write function completed "); 
   #endif
   }
   
