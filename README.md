@@ -10,7 +10,7 @@ Version 3 PCB update by Yuxiang (Eric) Li	and Zihan (Bronco) Chen (11/2017)
 
 Version 3.1 PCB update by Erica Deng (05/2018) - Isolation correction
 
-Version 4 PCB (SPI and I2C Variants) update by Andy Begley and Lifeng Liang (5/2018)
+Version 4 PCB (SPI and I2C Variants) revision update by Erica Deng, Yongxi Li, Andy Begley, and Lifeng Liang (5/2018)
 
 University of California, Irvine - California Plug Load Research Center (CalPlug)
 
@@ -33,6 +33,8 @@ Arduino/lib/targets/libraries/ADE7953/ADE7953.cpp     (the library implementatio
 Arduino/lib/targets/libraries/ADE7953/ADE7953.h       (the library description file)
 Arduino/lib/targets/libraries/ADE7953/examples     (the examples)
 Arduino/lib/targets/libraries/ADE7953/readme.txt   (this file)
+
+Note: as of 5/2018, the library has forked into an SPI and I2C variant that are tested with the ESP8266 and Atmel AVR.  There is also a known working SPI version for the ESP32.
 
 Building
 --------------------------------------------------------------------------------
