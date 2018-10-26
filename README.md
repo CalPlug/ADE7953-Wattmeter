@@ -14,7 +14,9 @@ Version 4 PCB (SPI and I2C Variants) revision update by Erica Deng, Yongxi Li, A
 
 University of California, Irvine - California Plug Load Research Center (CalPlug)
 
-February 23, 2017 - Library First Release
+February 23, 2017 - SPI Library First Release
+
+May 24, 2018 - I2C Library First Release
 
 Copyright (C) The Regents of the University of California, 2018
 
@@ -53,6 +55,8 @@ Usage
 --------------------------------------------------------------------------------
 
 There are several layers of functionality in the library.  Functions are defined to permit direct communication via registers of different bit sizes.  One can use the functions in this library for direct communication using the send and receive capability of the register calls or use direct functions.  The direct functions are also included. In order to access the functions, you must write in the Arduino file myADE7953.getFunction(), Function being the function you want such as Vrms or IrmsA (the different names of functions can be found in the .h file), while myADE7953 calls on the library. 
+
+A sample I2C and SPI library for Arduino have been built and are present in this project.  At the present time the I2C is less developed than the SPI version.
 
 Demo
 --------------------------------------------------------------------------------
