@@ -26,45 +26,46 @@ void loop() {
   long apnoload, activeEnergyA;
   float vRMS, iRMSA, powerFactorA, apparentPowerA, reactivePowerA, activePowerA;
 
-  apnoload = myADE7953.getAPNOLOAD();
-  Serial.print("APNOLOAD (hex): ");
-  Serial.println(apnoload, HEX);
-  delay(200); 
+//  apnoload = myADE7953.getAPNOLOAD();
+//  Serial.print("APNOLOAD (hex): ");
+//  Serial.println(apnoload, HEX);
+//  delay(200); 
 
-  vRMS = myADE7953.getVrms();  
-  Serial.print("Vrms (V): ");
+  Serial.print("\n In the Vrms(V)\n");
+  vRMS = myADE7953.getVrms(); 
+  Serial.print("\nVrms (V): ");
   Serial.println(vRMS);
   delay(200);
 
-  iRMSA = myADE7953.getIrmsA();  
-  Serial.print("IrmsA (mA): ");
-  Serial.println(iRMSA);
-  delay(200);
-
-  apparentPowerA = myADE7953.getInstApparentPowerA();  
-  Serial.print("Apparent Power A (mW): ");
-  Serial.println(apparentPowerA);
-  delay(200);
-
-  activePowerA = myADE7953.getInstActivePowerA();  
-  Serial.print("Active Power A (mW): ");
-  Serial.println(activePowerA);
-  delay(200);
-
-  reactivePowerA = myADE7953.getInstReactivePowerA();  
-  Serial.print("Rective Power A (mW): ");
-  Serial.println(reactivePowerA);
-  delay(200);
-
-  powerFactorA = myADE7953.getPowerFactorA();  
-  Serial.print("Power Factor A (x100): ");
-  Serial.println(powerFactorA);
-  delay(200);
-
-  activeEnergyA = myADE7953.getActiveEnergyA();  
-  Serial.print("Active Energy A (hex): ");
-  Serial.println(activeEnergyA);
-  delay(200);
+//  iRMSA = myADE7953.getIrmsA();  
+//  Serial.print("IrmsA (mA): ");
+//  Serial.println(iRMSA);
+//  delay(200);
+//
+//  apparentPowerA = myADE7953.getInstApparentPowerA();  
+//  Serial.print("Apparent Power A (mW): ");
+//  Serial.println(apparentPowerA);
+//  delay(200);
+//
+//  activePowerA = myADE7953.getInstActivePowerA();  
+//  Serial.print("Active Power A (mW): ");
+//  Serial.println(activePowerA);
+//  delay(200);
+//
+//  reactivePowerA = myADE7953.getInstReactivePowerA();  
+//  Serial.print("Rective Power A (mW): ");
+//  Serial.println(reactivePowerA);
+//  delay(200);
+//
+//  powerFactorA = myADE7953.getPowerFactorA();  
+//  Serial.print("Power Factor A (x100): ");
+//  Serial.println(powerFactorA);
+//  delay(200);
+//
+//  activeEnergyA = myADE7953.getActiveEnergyA();  
+//  Serial.print("Active Energy A (hex): ");
+//  Serial.println(activeEnergyA);
+//  delay(200);
 
   Serial.println();
 
