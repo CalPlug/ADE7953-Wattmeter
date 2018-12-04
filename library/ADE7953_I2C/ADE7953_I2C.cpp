@@ -1,10 +1,11 @@
 /*
- ADE7953.cpp - Simple library for operating the ADE7953 Single-Phase AC Line measurement IC over SPI for Arduino Uno 
-  Created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
+ ADE7953.cpp - Simple library for operating the ADE7953 Single-Phase AC Line measurement IC over I2C for Arduino Uno 
+and ESP8266  Created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
   January 23, 2017 - v6.3 (pre-release)
   May 21, 2018 - I2C version modified by Lifeng Liang, minor final touchups by M. Klopfer (12/4/2018)
   University of California, Irvine - California Plug Load Research Center (CalPlug), Copyright 2018
   Released into the public domain.
+  Note: specific definition of I2C pins may need to happen for the ESP8266 in this library if defaults are not used - look at the .h companion file.
 */
 
 #include "Arduino.h"
@@ -12,12 +13,6 @@
 #include "ADE7953_I2C.h"
 #define ADE7953_VERBOSE_DEBUG //This line turns on verbose debug via serial monitor (Normally off or //'ed).  Use sparingly and in a test program!  Turning this on can take a lot of memory!  This is non-specific and for all functions, beware, it's a lot of output!  Reported bytes are in HEX
 int ADE_Address = 56;//I2C Address of ADE7953, or using equivalent value in hex: 0x38 
-
-
-
-
-//******************************************************************************************
-
 
 
 //*****************ADE7953 Register Value Constants*****************//
@@ -465,6 +460,10 @@ Setting Reactive Energy Accumulation Mode (Current Channel B)
 //11 ZXTO_IB Set to 1 when a zero crossing has been missing on Current Channel B for the length of time specified in the ZXTOUT register
 //12 ZXIB Set to 1 when a current Channel B zero crossing is obtained
 //13 OIB Set to 1 when current Channel B peak has exceeded the overcurrent threshold set in the OILVL register
+
+
+//******************************************************************************************
+
 
 
 //****************User Program Functions*****************
