@@ -7,8 +7,11 @@
 
 //Define ADE7953 object with hardware parameters specified
 //Both CLK and CS pin has to be set in HIGH in order to make ADE7953 communicate in I2C protocol
+
+//Define your I2C pins here!
 #define local_CLK 12  //Set the CLK pin for I2C communication as pin 12
 #define local_CS 13   //Set the CS pin for I2C communication as pin 13
+
 /*  Call the ADE7953 Object with hardware parameters specified,  */
 /*  the "local" lets us use the same parameters for examples in  */
 /*  this program as what is assigned to the ADE7953 object       */
