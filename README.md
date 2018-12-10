@@ -1,8 +1,8 @@
 # ADE7953-Wattmeter
 
-Example Arduino compatable library for operating the ADE7953 Single-Phase AC Line measurement IC over SPI interfacing 
+Example Arduino compatable library for operating the Analog Devices ADE7953 Single-Phase AC Line measurement IC over SPI and I2C interfacing 
 
-Arduino Uno/ ESP8266 Library created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
+Arduino Uno / ESP8266 Library created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
 
 PCB v1 and v2 Board design by Damien Putignani (11/2016, 02/2017)
 
@@ -10,7 +10,7 @@ Version 3 PCB update by Yuxiang (Eric) Li	and Zihan (Bronco) Chen (11/2017)
 
 Version 3.1 PCB update by Erica Deng (05/2018) - Isolation correction
 
-Version 4 PCB (SPI and I2C Variants) revision update by Erica Deng, Yongxi Li, Andy Begley, and Lifeng Liang (5/2018)
+Version 4 PCB (SPI / UART and I2C Variants) revision update by Erica Deng, Yongxi Li, Andy Begley, and Lifeng Liang (5/2018)
 
 ESP32 SPI Extension Development by Luis Contreras as an extended part of the CalPlug EVSE Project (5/2018) - https://github.com/CalPlug/EVSE_Smart_Charger
 
@@ -18,7 +18,7 @@ University of California, Irvine - California Plug Load Research Center (CalPlug
 
 February 23, 2017 - SPI Library First Release
 
-May 24, 2018 - I2C Library First Release
+May 24, 2018 - I2C Library First Release, updated 12/2018
 
 Copyright (C) The Regents of the University of California, 2018
 
