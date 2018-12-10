@@ -99,6 +99,8 @@ Power Factor (div 100): 99.90
 
 Active Energy A (hex): 5132 
 
+See initial checkout instructions for the PCB for expected demo code output:  https://github.com/CalPlug/ADE7953-Wattmeter/blob/master/Documents/Construction%20of%20Wattmeter.pdf
+
 
 Physical Demo Board
 ----------
