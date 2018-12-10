@@ -2,7 +2,7 @@
 
 Example Arduino compatable library for operating the ADE7953 Single-Phase AC Line measurement IC over SPI interfacing 
 
-Created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
+Arduino Uno/ ESP8266 Library created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
 
 PCB v1 and v2 Board design by Damien Putignani (11/2016, 02/2017)
 
@@ -11,6 +11,8 @@ Version 3 PCB update by Yuxiang (Eric) Li	and Zihan (Bronco) Chen (11/2017)
 Version 3.1 PCB update by Erica Deng (05/2018) - Isolation correction
 
 Version 4 PCB (SPI and I2C Variants) revision update by Erica Deng, Yongxi Li, Andy Begley, and Lifeng Liang (5/2018)
+
+ESP32 SPI Extension Development by Luis Contreras as an extended part of the CalPlug EVSE Project (5/2018) - https://github.com/CalPlug/EVSE_Smart_Charger
 
 University of California, Irvine - California Plug Load Research Center (CalPlug)
 
@@ -57,6 +59,24 @@ Usage
 There are several layers of functionality in the library.  Functions are defined to permit direct communication via registers of different bit sizes.  One can use the functions in this library for direct communication using the send and receive capability of the register calls or use direct functions.  The direct functions are also included. In order to access the functions, you must write in the Arduino file myADE7953.getFunction(), Function being the function you want such as Vrms or IrmsA (the different names of functions can be found in the .h file), while myADE7953 calls on the library. 
 
 A sample I2C and SPI library for Arduino have been built and are present in this project.  At the present time the I2C is less developed than the SPI version.
+
+Calibration
+--------------------------------------------------------------------------------
+For a given hardware (register set) gain setting in the ADE7953 (we calibrate for each gain option in our final use code) we perform the calibration as inputs to each call of the decimalize() function for reported values:
+
+
+0) Set a given HW gain value - this is important, each gain needs a different calibration set typically, also beware the input impedance can change for different hardware (register set) gain values!
+
+1) We set values to gain = 1 and offset = 0 for each channel that will be calibrated.
+
+2) Supply a known value and record returned values for all channels we are calibrating - this may be using a load that is measured by another calibrated meter so the current and voltage (or whatever basis parameters you care about are known).
+
+3) In MS Excel (or Origin, Matlab, or any other program that can perform linear regression), we calculate the regression values (m (gain) and b (offset)) for y=mx+b, where y is the proper value, and x is the ADC returned value.  We take a number of measurements across the linear measurement range.  Typically the ADCs on this IC are very linear.  Keep in mind the r^2 value for the fitting is not all that matters - the distance between the fit line and the expected values (the residuals) will give you an idea of calibration gross accuracy across your measurement range. 
+
+4) Enter gain and offset regression values for each calibrated input channel (overwriting the initial gain=1 and offset=0 values used in the calibration process), recompile, and test.
+
+5) Repeat calibration process if your outputted values do not now closely match your expected measured values.
+
 
 Demo
 --------------------------------------------------------------------------------
