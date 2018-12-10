@@ -60,6 +60,8 @@ There are several layers of functionality in the library.  Functions are defined
 
 A sample I2C and SPI library for Arduino have been built and are present in this project.  At the present time the I2C is less developed than the SPI version.
 
+Note: A varient of this project's code was shown to work on the Espressif ESP32, please see this project for more details:  https://github.com/CalPlug/EVSE_Smart_Charger
+
 Calibration
 --------------------------------------------------------------------------------
 For a given hardware (register set) gain setting in the ADE7953 (we calibrate for each gain option in our final use code) we perform the calibration as inputs to each call of the decimalize() function for reported values:
@@ -94,8 +96,6 @@ Active Power A (mW): 80000
 Reactive Power A (mW): 4100
 
 Power Factor (div 100): 99.90
-
-A varient of this project's code was shown to work on the Espressif ESP32, please see this project for more details:  https://github.com/CalPlug/EVSE_Smart_Charger
 
 Active Energy A (hex): 5132 
 
