@@ -2,7 +2,7 @@
 
 Example Arduino compatable library for operating the ADE7953 Single-Phase AC Line measurement IC over SPI interfacing 
 
-Created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
+Arduino Uno/ ESP8266 Library created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
 
 PCB v1 and v2 Board design by Damien Putignani (11/2016, 02/2017)
 
@@ -11,6 +11,8 @@ Version 3 PCB update by Yuxiang (Eric) Li	and Zihan (Bronco) Chen (11/2017)
 Version 3.1 PCB update by Erica Deng (05/2018) - Isolation correction
 
 Version 4 PCB (SPI and I2C Variants) revision update by Erica Deng, Yongxi Li, Andy Begley, and Lifeng Liang (5/2018)
+
+ESP32 SPI Extension Development by Luis Contreras as an extended part of the CalPlug EVSE Project (5/2018) - https://github.com/CalPlug/EVSE_Smart_Charger
 
 University of California, Irvine - California Plug Load Research Center (CalPlug)
 
