@@ -79,7 +79,7 @@ For a given hardware (register set) gain setting in the ADE7953 (we calibrate fo
 
 5) Repeat calibration process if your outputted values do not now closely match your expected measured values.
 
-A sample calibration spreadsheet is provided:  https://github.com/CalPlug/ADE7953-Wattmeter/tree/master/library
+A sample calibration spreadsheet is provided:  https://github.com/CalPlug/ADE7953-Wattmeter/blob/master/library/LinearCalibrationCalculator.xls
 
 Demo
 --------------------------------------------------------------------------------
