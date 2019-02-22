@@ -9,7 +9,8 @@ ESP32 Extension Development by Luis Contreras as part of the CalPlug EVSE Projec
 University of California, Irvine - California Plug Load Research Center (CalPlug)
 
 February 23, 2017 - first version
-May 14, 2018 - Version 1.0 for ESP32 Version
+May 14, 2018 - Version 0.1 for ESP32 Version
+Feb. 22, 2019 - Version 1.0 for ESP32 Version (release)
 
 Copyright (C) The Regents of the University of California, 2017
 
