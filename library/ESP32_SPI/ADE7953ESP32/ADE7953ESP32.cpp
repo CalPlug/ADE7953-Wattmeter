@@ -1,20 +1,54 @@
 /*
- ADE7953.cpp - Simple library for operating the ADE7953 Single-Phase AC Line measurement IC over SPI for Arduino Uno 
+ ADE7953ESP32.cpp - Simple library for operating the ADE7953 Single-Phase AC Line measurement IC over SPI for ESP32 Arduino Core
   Created by Umar Kazmi, Crystal Lai, and Michael Klopfer, Ph.D.
-  January 23, 2017 - v6.2 (pre-release)
+  Modified for ESP32 operation by Luis Contreras, 2018 with polish updates by M.J. Klopfer
   University of California, Irvine - California Plug Load Research Center (CalPlug)
-  Released into the public domain.
+  Released into the public domain.    Feb 22, 2019 - v1.0 (first final release)
 */
 
 #include "Arduino.h"
 #include "ADE7953ESP32.h"
 #include "esp32-hal-spi.h"
 //#define ADE7953_VERBOSE_DEBUG //This line turns on verbose debug via serial monitor (Normally off or //'ed).  Use sparingly and in a test program!  Turning this on can take a lot of memory!  This is non-specific and for all functions, beware, it's a lot of output!  Reported bytes are in HEX
-#define NEWBRANDY
-//#define BRANDY
-//#define DEVKIT
 
-spi_t * spy;
+spi_t * spy; //for ESP32
+
+
+//******************Calibration Factors*************************
+//NOTE  These are provided for convenience.  The decimalize(long input, float factor, float offset) function is used to do typecasting and conversion for SIGNED (2's compliment) reporting registers from long to float, but it can also provide linear calibration to returned values.  This is TOTALLY SEPARATE from the internal channel gain and offset corrections as well as the analog gain that can be set for each channel.  Based on our tests, the use of different board components in the filter and loading parts of this circuit can easily throw off calibration.  The values shown here will likely not work for you out of the box for you.  By far the safest thing is to use an identity such that gain (m) = 1 and offset (b)=0.  Then perform your own calibration in your user code.  You can do a pre-correction here then a post correction in your user code, but that gets confusing.  If you really want to use this capability, we recommend making sure you note in your user code these values as you will have to change your library (technically a fork) to update.  Please use the Excel calibration calculator provided to help you find the calibration values using a known source/load and meter to calibrate.  Remember if you change the analog gain or use any internal channel calibration functions on the ADE7953, this will adjust your calibration accordingly.
+
+#define getPowerFactorA_m 1.0  //327.67 was a previous value used for gain
+#define getPowerFactorA_b 0.0
+
+#define getPowerFactorB_m 1.0  //327.67 was a previous value used for gain
+#define getPowerFactorB_b 0.0
+
+#define getPeriod_m 1.0
+#define getPeriod_b 0.0
+
+#define getVrms_m 1.0  //19090 was a previous value used for gain
+#define getVrms_b 0.0
+
+#define getIrmsA_m 1.0 //1327 was a previous value used for gain
+#define getIrmsA_b 0.0
+
+#define getIrmsB_m 1.0 //1327 was a previous value used for gain
+#define getIrmsB_b 0.0
+
+#define getInstApparentPowerA_m 1.0 //1.502 was a previous value used for gain
+#define getInstApparentPowerA_b 0.0
+
+#define getInstActivePowerB_m 1.0 //1.502 was a previous value used for gain
+#define getInstActivePowerB_b 0.0
+
+#define getInstReactivePowerA_m 1.0 
+#define getInstReactivePowerA_b 0.0
+
+#define getInstReactivePowerB_m 1.0 
+#define getInstReactivePowerB_b 0.0
+
+
+
 
 
 //******************************************************************************************
@@ -473,26 +507,39 @@ Setting Reactive Energy Accumulation Mode (Current Channel B)
 
 
 uint8_t ADE7953::getVersion(){
-  return spiAlgorithm8_read(functionBitVal(Version_8,1), functionBitVal(Version_8,0));  //An example of the address lookup - the spiAlgorithm8_read((functionBitVal(addr,1), functionBitVal(addr,1)) would return the eqivenet to spiAlgorithm8_read(0x07,0x02) when working properly
+  return spiAlgorithm8_read(functionBitVal(Version_8,1), functionBitVal(Version_8,0));  //An example of the address lookup - the spiAlgorithm8_read((functionBitVal(addr,1), functionBitVal(addr,1)) would return the eqiv. to spiAlgorithm8_read(0x07,0x02) when working properly
 }
 
 float ADE7953::getPowerFactorA(){  
 	int16_t value=0;  
 	value=spiAlgorithm16_read((functionBitVal(PFA_16,1)),(functionBitVal(PFA_16,0))); 
-	float decimal = decimalize(value, 327.67, 0);
+	float decimal = decimalize(value, getPowerFactorA_m, getPowerFactorA_b);
 return abs(decimal);
   }     
+  
+float ADE7953::getPowerFactorB(){  
+	int16_t value=0;  
+	value=spiAlgorithm16_read((functionBitVal(PFB_16,1)),(functionBitVal(PFB_16,0))); 
+	float decimal = decimalize(value, getPowerFactorA_m, getPowerFactorA_b);
+return abs(decimal);
+  }   
 
 int16_t ADE7953::getPhaseCalibA(){  
 	int16_t value=0;  
 	value=spiAlgorithm16_read((functionBitVal(PHCALA_16,1)),(functionBitVal(PHCALA_16,0))); 
 return value;
   }   
+  
+int16_t ADE7953::getPhaseCalibB(){  
+	int16_t value=0;  
+	value=spiAlgorithm16_read((functionBitVal(PHCALB_16,1)),(functionBitVal(PHCALB_16,0))); 
+return value;
+  }   
 
 float ADE7953::getPeriod(){  
 	uint16_t value=0;  
 	value=spiAlgorithm16_read((functionBitVal(Period_16,1)),(functionBitVal(Period_16,0))); 
-	float decimal = decimalize(value, 1, 0);
+	float decimal = decimalize(value, getPeriod_m, getPeriod_b);
 return decimal;
   }
 
@@ -511,7 +558,7 @@ return value;
 float ADE7953::getVrms(){  
 	unsigned long value=0;  
 	value=spiAlgorithm32_read((functionBitVal(VRMS_32,1)),(functionBitVal(VRMS_32,0)));
-	float decimal = decimalize(value, 19090, 0);
+	float decimal = decimalize(value, getVrms_m, getVrms_b);
 return decimal;
   }  
   
@@ -521,17 +568,23 @@ long ADE7953::getInstCurrentA(){
 return value;
   }
   
+long ADE7953::getInstCurrentB(){  
+	long value=0;  
+	value=spiAlgorithm32_read((functionBitVal(IB_32,1)),(functionBitVal(IB_32,0))); 
+return value;
+  }
+  
 float ADE7953::getIrmsA(){  
 	unsigned long value=0;  
 	value=spiAlgorithm32_read((functionBitVal(IRMSA_32,1)),(functionBitVal(IRMSA_32,0))); 
-	float decimal = decimalize(value, 1327, 0);
+	float decimal = decimalize(value, getIrmsA_m, getIrmsA_b);
 return decimal;
   }
   
 float ADE7953::getIrmsB(){
 	unsigned long value=0;
 	value=spiAlgorithm32_read((functionBitVal(IRMSB_32,1)), (functionBitVal(IRMSB_32, 0)));
-	float decimal = decimalize(value, 1327, 0);
+	float decimal = decimalize(value, getIrmsB_m, getIrmsB_b);
 return decimal;
 	}
   
@@ -546,10 +599,22 @@ unsigned long ADE7953::getIpeakA(){
 	value=spiAlgorithm32_read((functionBitVal(IAPEAK_32,1)),(functionBitVal(IAPEAK_32,0))); 
 return value;
   }
+  
+unsigned long ADE7953::getIpeakB(){  
+	unsigned long value=0;  
+	value=spiAlgorithm32_read((functionBitVal(IBPEAK_32,1)),(functionBitVal(IBPEAK_32,0))); 
+return value;
+  }
 
 long ADE7953::getActiveEnergyA(){  
 	long value=0; 
 	value=spiAlgorithm32_read((functionBitVal(AENERGYA_32,1)),(functionBitVal(AENERGYA_32,0))); 
+return value;
+  }
+  
+long ADE7953::getActiveEnergyB(){  
+	long value=0; 
+	value=spiAlgorithm32_read((functionBitVal(AENERGYB_32,1)),(functionBitVal(AENERGYB_32,0))); 
 return value;
   }
   
@@ -558,33 +623,68 @@ long ADE7953::getReactiveEnergyA(){
 	value=spiAlgorithm32_read((functionBitVal(RENERGYA_32,1)),(functionBitVal(RENERGYA_32,0))); 
 return value;
   }
+  
+long ADE7953::getReactiveEnergyB(){  
+	long value=0;  
+	value=spiAlgorithm32_read((functionBitVal(RENERGYB_32,1)),(functionBitVal(RENERGYB_32,0))); 
+return value;
+  }
 
 long ADE7953::getApparentEnergyA(){ 
 	long value=0;  
 	value=spiAlgorithm32_read((functionBitVal(APENERGYA_32,1)),(functionBitVal(APENERGYA_32,0))); 
 return value;
   }
+  
+long ADE7953::getApparentEnergyB(){ 
+	long value=0;  
+	value=spiAlgorithm32_read((functionBitVal(APENERGYB_32,1)),(functionBitVal(APENERGYB_32,0))); 
+return value;
+  }
     
 float ADE7953::getInstApparentPowerA(){  
 	long value=0;  
 	value=spiAlgorithm32_read((functionBitVal(AVA_32,1)),(functionBitVal(AVA_32,0))); 
-	float decimal = decimalize(value, 1.502, 0);
+	float decimal = decimalize(value, getInstApparentPowerA_m, getInstApparentPowerA_b);
+return abs(decimal);
+  }
+  
+float ADE7953::getInstApparentPowerB(){  
+	long value=0;  
+	value=spiAlgorithm32_read((functionBitVal(AVB_32,1)),(functionBitVal(AVB_32,0))); 
+	float decimal = decimalize(value, getInstApparentPowerB_m, getInstApparentPowerB_b);
 return abs(decimal);
   }
   
 float ADE7953::getInstActivePowerA(){  
 	long value=0;  
 	value=spiAlgorithm32_read((functionBitVal(AWATT_32,1)),(functionBitVal(AWATT_32,0))); 
-	float decimal = decimalize(value, 1.502, 0);
+	float decimal = decimalize(value, getInstActivePowerA_m, getInstActivePowerA_b);
+return abs(decimal);
+  }
+  
+float ADE7953::getInstActivePowerB(){  
+	long value=0;  
+	value=spiAlgorithm32_read((functionBitVal(BWATT_32,1)),(functionBitVal(BWATT_32,0))); 
+	float decimal = decimalize(value, getInstActivePowerB_m, getInstActivePowerB_b);
 return abs(decimal);
   }
   
 float ADE7953::getInstReactivePowerA(){  
 	long value=0;  
 	value=spiAlgorithm32_read((functionBitVal(AVAR_32,1)),(functionBitVal(AVAR_32,0))); 
-	float decimal = decimalize(value, 1.502, 0);
+	float decimal = decimalize(value, getInstReactivePowerA_m, getInstReactivePowerA_b);
 return decimal;
   }
+  
+float ADE7953::getInstReactivePowerB(){  
+	long value=0;  
+	value=spiAlgorithm32_read((functionBitVal(BVAR_32,1)),(functionBitVal(BVAR_32,0))); 
+	float decimal = decimalize(value, getInstReactivePowerB_m, getInstReactivePowerB_b);
+return decimal;
+  }
+  
+  //Note:  The easiest way to quickly measure power is: P(real_rms)=V(rms)*I(rms)*PF, the alternate is to accumulate energy and time average
   
 //*******************************************************
 
@@ -592,7 +692,7 @@ return decimal;
 //****************ADE 7953 Library Control Functions**************************************
 
 //****************Object Definition*****************
-ADE7953::ADE7953(int SS, int SPI_freq)
+ADE7953::ADE7953(int SS, int SPI_freq)  //set SPI frequency and SS pin designation
 {
   _SS=SS;
   _SPI_freq=SPI_freq;
@@ -605,9 +705,7 @@ void ADE7953::initialize(){
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print("ADE7953:initialize function started "); 
   #endif
-// Slave select is 15
 
-  #ifdef NEWBRANDY
   spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
   spiAttachSCK(spy, -1);
   spiAttachMOSI(spy, -1);
@@ -615,7 +713,7 @@ void ADE7953::initialize(){
   pinMode(_SS, OUTPUT);
   digitalWrite(_SS, HIGH);
   delay(50);
-  digitalWrite(_SS, LOW);
+  digitalWrite(_SS, LOW); //Enable data transfer by bringing SS line LOW
   spiTransferByte(spy, 0x00);
   spiTransferByte(spy, 0xFE);
   spiTransferByte(spy, WRITE);
@@ -626,86 +724,15 @@ void ADE7953::initialize(){
   spiTransferByte(spy, WRITE);
   spiTransferByte(spy, 0x00);
   spiTransferByte(spy, 0x30);  
-  digitalWrite(_SS, HIGH);
+  digitalWrite(_SS, HIGH); //Disable data transfer by bringing SS line HIGH
   spiStopBus(spy);
-  #endif
-  #ifdef BRANDY
-  spy = spiStartBus(FSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMOSI(spy, -1);
-  spiAttachMISO(spy, -1);
-  pinMode(_SS, OUTPUT);
-  digitalWrite(_SS, HIGH);
-  delay(50);
-  digitalWrite(_SS, LOW);
-  spiTransferByte(spy, 0x00);
-  spiTransferByte(spy, 0xFE);
-  spiTransferByte(spy, WRITE);
-  spiTransferByte(spy, 0x00);
-  spiTransferByte(spy, 0xAD);       
-  spiTransferByte(spy, 0x01);
-  spiTransferByte(spy, 0x20);
-  spiTransferByte(spy, WRITE);
-  spiTransferByte(spy, 0x00);
-  spiTransferByte(spy, 0x30);  
-  digitalWrite(_SS, HIGH);
-  spiStopBus(spy);
-  #endif
-  #ifdef DEVKIT
-  spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMISO(spy, -1);
-  spiAttachMOSI(spy, -1);
-  spiAttachSS(spy, -1, -1);
-  delay(50);
-  spiEnableSSPins(spy, SPI_CS0);
-  spiSSSet(spy);  
-  spiTransferByte(spy, 0x00);
-  spiTransferByte(spy, 0xFE);
-  spiTransferByte(spy, WRITE);
-  spiTransferByte(spy, 0x00);
-  spiTransferByte(spy, 0xAD);       
-  spiTransferByte(spy, 0x01);
-  spiTransferByte(spy, 0x20);
-  spiTransferByte(spy, WRITE);
-  spiTransferByte(spy, 0x00);
-  spiTransferByte(spy, 0x30);  
-  spiSSClear(spy);
-  spiStopBus(spy);
-  #endif
-  
-  // pinMode(_SS, OUTPUT); // FYI: SS is pin 10 by Arduino's SPI library, set SS pin as Output
-  // digitalWrite(_SS, HIGH); //Initialize pin as HIGH
-  // SPI.begin();
-  // delay(50);
-  // SPI.setBitOrder(MSBFIRST);  //Define MSB as first (explicitly)
-  // SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  // delay(50);
-  
-  // //Write 0x00AD to Register Address 0x00FE. "This unlocks Register 0x120."
-  // digitalWrite(_SS, LOW);//Enable data transfer by bringing SS line LOW.
-  // SPI.transfer(0x00); //Pass in MSB of register 0x00FE first.
-  // SPI.transfer(0xFE); //Pass in LSB of register 0x00FE next.
-  // SPI.transfer(WRITE);//This tells the ADE7953 that data is to be written to register 0x00FE.
-  // SPI.transfer(0x00); //Pass in MSB of 0x00AD first to write to 0x00FE.
-  // SPI.transfer(0xAD); //Pass in LSB of 0x00AD next to write to 0x00FE.
-  
-  // //Write 0x0030 to Register Address 0x0120. "This configures the optimum settings."
-  // SPI.transfer(0x01); //Pass in MSB of register 0x0120 first.
-  // SPI.transfer(0x20); //Pass in LSB of register 0x0120 next.
-  // SPI.transfer(WRITE);//This tells the ADE7953 that data is to be written to register 0x0120.
-  // SPI.transfer(0x00); //Pass in MSB of 0x0030 first to write to 0x0120.
-  // SPI.transfer(0x30); //Pass in LSB of 0x0030 next to write to 0x0120.
-  // SPI.endTransaction();
-  // digitalWrite(_SS, HIGH);//End data transfer by bringing SS line HIGH.
-  
-  
+
   delay(100);
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print(" ADE7953:initialize function completed "); 
   #endif
   
-  //Calibrations
+  //Initial Start-up Init. Commands
   //spiAlgorithm16_write((functionBitVal(PHCALA_16,1)),(functionBitVal(PHCALA_16,0)),0x00,0x00);
   //delay(100);
   spiAlgorithm32_write((functionBitVal(AP_NOLOAD_32,1)),(functionBitVal(AP_NOLOAD_32,0)),0x00,0x00,0x00,0x01); //Check for ensuring read and write operations are okay
@@ -746,7 +773,6 @@ uint8_t ADE7953::spiAlgorithm8_read(byte MSB, byte LSB) { //This is the algorith
   byte one;
   byte two; //This may be a dummy read, it looks like the ADE7953 is outputting an extra byte as a 16 bit response even for a 1 byte return
   
-  #ifdef NEWBRANDY
   spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
   spiAttachSCK(spy, -1);
   spiAttachMOSI(spy, -1);
@@ -759,55 +785,6 @@ uint8_t ADE7953::spiAlgorithm8_read(byte MSB, byte LSB) { //This is the algorith
   two = spiTransferByte(spy, WRITE);
   digitalWrite(_SS, HIGH);
   spiStopBus(spy);
-  #endif
-  #ifdef BRANDY
-  spy = spiStartBus(FSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMOSI(spy, -1);
-  spiAttachMISO(spy, -1);
-  //pinMode(_SS, OUTPUT);
-  //digitalWrite(_SS, HIGH);  
-  digitalWrite(_SS, LOW);
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);  
-  spiTransferByte(spy, READ);    
-  one = spiTransferByte(spy, WRITE);
-  two = spiTransferByte(spy, WRITE);
-  digitalWrite(_SS, HIGH);
-  spiStopBus(spy);
-  #endif
-  
-  #ifdef DEVKIT
-  spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMISO(spy, -1);
-  spiAttachMOSI(spy, -1);  
-  spiAttachSS(spy, -1, -1);
-  spiEnableSSPins(spy, SPI_CS0);
-  spiSSSet(spy);  
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);  
-  spiTransferByte(spy, READ);    
-  one = spiTransferByte(spy, WRITE);
-  two = spiTransferByte(spy, WRITE);  
-  spiSSClear(spy);
-  spiStopBus(spy);
-  #endif  
-  //digitalWrite(_SS, LOW);  //Enable data transfer by bringing SS line LOW
-  
-  //SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  
-  // SPI.transfer(MSB);  //Pass in MSB of register to be read first.
-  // SPI.transfer(LSB);  //Pass in LSB of register to be read next.
-  //Read in values sequentially and bitshift for a 32 bit entry
-  
-  //SPI.transfer(READ); //Send command to begin readout
-  
-  // one = (SPI.transfer(WRITE));  //MSB Byte 1  (Read in data on dummy write (null MOSI signal)) - only one needed as 1 byte
-  // two = (SPI.transfer(WRITE));  //"LSB "Byte 2?"  (Read in data on dummy write (null MOSI signal)) - only one needed as 1 byte, but it seems like it responses will send a byte back in 16 bit response total, likely this LSB is useless, but for timing it will be collected.  This may always be a duplicate of the first byte, 
-  
-  // SPI.endTransaction();
-  // digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH
   
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print("ADE7953::spiAlgorithm8_read function details: ");
@@ -837,7 +814,6 @@ uint16_t ADE7953::spiAlgorithm16_read(byte MSB, byte LSB) { //This is the algori
   byte one;
   byte two;
   
-  #ifdef NEWBRANDY
   spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
   spiAttachSCK(spy, -1);
   spiAttachMOSI(spy, -1);
@@ -850,51 +826,6 @@ uint16_t ADE7953::spiAlgorithm16_read(byte MSB, byte LSB) { //This is the algori
   two = spiTransferByte(spy, WRITE);
   digitalWrite(_SS, HIGH);
   spiStopBus(spy);
-  #endif
-  #ifdef BRANDY
-  spy = spiStartBus(FSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMOSI(spy, -1);
-  spiAttachMISO(spy, -1);
-  //pinMode(_SS, OUTPUT);
-  //digitalWrite(_SS, HIGH);  
-  digitalWrite(_SS, LOW);
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);  
-  spiTransferByte(spy, READ);    
-  one = spiTransferByte(spy, WRITE);
-  two = spiTransferByte(spy, WRITE);
-  digitalWrite(_SS, HIGH);
-  spiStopBus(spy);
-  #endif
-  #ifdef DEVKIT
-  spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMISO(spy, -1);
-  spiAttachMOSI(spy, -1);  
-  spiAttachSS(spy, -1, -1);
-  spiEnableSSPins(spy, SPI_CS0);
-  spiSSSet(spy);
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);
-  spiTransferByte(spy, READ);
-  one = spiTransferByte(spy, WRITE);
-  two = spiTransferByte(spy, WRITE);  
-  spiSSClear(spy);
-  spiStopBus(spy);
-  #endif
-  
-  
-  // digitalWrite(_SS, LOW);  //Enable data transfer by bringing SS line LOW
-  // SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  // SPI.transfer(MSB);  //Pass in MSB of register to be read first.
-  // SPI.transfer(LSB);  //Pass in LSB of register to be read next.
-  //Read in values sequentially and bitshift for a 32 bit entry
-  //SPI.transfer(READ); //Send command to begin readout
-  // one = SPI.transfer(WRITE);  //MSB Byte 1  (Read in data on dummy write (null MOSI signal))
-  // two = SPI.transfer(WRITE);  //LSB Byte 2  (Read in data on dummy write (null MOSI signal))
-  // SPI.endTransaction();
-  // digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH
   
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print("ADE7953::spiAlgorithm16_read function details: ");
@@ -930,7 +861,6 @@ uint32_t ADE7953::spiAlgorithm24_read(byte MSB, byte LSB) { //This is the algori
   byte two;
   byte three;
   
-  #ifdef NEWBRANDY
   spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
   spiAttachSCK(spy, -1);
   spiAttachMOSI(spy, -1);
@@ -944,55 +874,8 @@ uint32_t ADE7953::spiAlgorithm24_read(byte MSB, byte LSB) { //This is the algori
   three = spiTransferByte(spy, WRITE);
   digitalWrite(_SS, HIGH);
   spiStopBus(spy);
-  #endif
-  #ifdef BRANDY
-  spy = spiStartBus(FSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMOSI(spy, -1);
-  spiAttachMISO(spy, -1);
-  //pinMode(_SS, OUTPUT);
-  //digitalWrite(_SS, HIGH);  
-  digitalWrite(_SS, LOW);
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);  
-  spiTransferByte(spy, READ);    
-  one = spiTransferByte(spy, WRITE);
-  two = spiTransferByte(spy, WRITE);
-  three = spiTransferByte(spy, WRITE);
-  digitalWrite(_SS, HIGH);
-  spiStopBus(spy);
-  #endif
-  #ifdef DEVKIT
-  spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMISO(spy, -1);
-  spiAttachMOSI(spy, -1);  
-  spiAttachSS(spy, -1, -1);
-  spiEnableSSPins(spy, SPI_CS0);
-  spiSSSet(spy);
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);
-  spiTransferByte(spy, READ);
-  one = spiTransferByte(spy, WRITE);
-  two = spiTransferByte(spy, WRITE);
-  three = spiTransferByte(spy, WRITE);
-  spiSSClear(spy);
-  spiStopBus(spy);
-  #endif 
 
-  
-  // digitalWrite(_SS, LOW);  //Enable data transfer by bringing SS line LOW
-  // SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  // SPI.transfer(MSB);  //Pass in MSB of register to be read first.
-  // SPI.transfer(LSB);  //Pass in LSB of register to be read next.
-  //Read in values sequentially and bitshift for a 32 bit entry
-  // SPI.transfer(READ); //Send command to begin readout
-  // one= SPI.transfer(WRITE); //MSB Byte 1  (Read in data on dummy write (null MOSI signal))
-  // two= SPI.transfer(WRITE);   // (Read in data on dummy write (null MOSI signal))
-  // three= SPI.transfer(WRITE); //LSB Byte 3  (Read in data on dummy write (null MOSI signal))
-  // SPI.endTransaction();
-  // digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH
-  
+   
  #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print("ADE7953::spiAlgorithm24_read function details: ");
    Serial.print("Address Byte 1(MSB)[HEX]: ");  
@@ -1011,12 +894,6 @@ uint32_t ADE7953::spiAlgorithm24_read(byte MSB, byte LSB) { //This is the algori
   //Post-read packing and bitshifting operation
   readval_unsigned = (((uint32_t) one << 16)+ ((uint32_t) two << 8) + ((uint32_t) three)); //(Alternative shift algorithm)
    
-
-   
- // readval_unsigned =  ((one << 16) & 0x00FF0000);  //process MSB  //(Alternative shift algorithm)
- // readval_unsigned = readval_unsigned + ((two << 8) & 0X0000FF00);
- // readval_unsigned = readval_unsigned + (three & 0X000000FF);  //Process LSB
-
 			return readval_unsigned;
   }
   
@@ -1030,7 +907,7 @@ uint32_t ADE7953::spiAlgorithm32_read(byte MSB, byte LSB) { //This is the algori
   byte two;
   byte three;
   byte four;
-  #ifdef NEWBRANDY
+
   spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
   spiAttachSCK(spy, -1);
   spiAttachMOSI(spy, -1);
@@ -1045,64 +922,14 @@ uint32_t ADE7953::spiAlgorithm32_read(byte MSB, byte LSB) { //This is the algori
   four = spiTransferByte(spy, WRITE);	
   digitalWrite(_SS, HIGH);
   spiStopBus(spy);
-  #endif
-  #ifdef BRANDY
-  spy = spiStartBus(FSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMOSI(spy, -1);
-  spiAttachMISO(spy, -1);
-  //pinMode(_SS, OUTPUT);
-  //digitalWrite(_SS, HIGH);  
-  digitalWrite(_SS, LOW);
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);  
-  spiTransferByte(spy, READ);    
-  one = spiTransferByte(spy, WRITE);
-  two = spiTransferByte(spy, WRITE);
-  three = spiTransferByte(spy, WRITE);
-  four = spiTransferByte(spy, WRITE);	
-  digitalWrite(_SS, HIGH);
-  spiStopBus(spy);
-  #endif
-  #ifdef DEVKIT
-  spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMISO(spy, -1);
-  spiAttachMOSI(spy, -1);  
-  spiAttachSS(spy, -1, -1);
-  spiEnableSSPins(spy, SPI_CS0);
-  spiSSSet(spy);  
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);
-  spiTransferByte(spy, READ);
-  one = spiTransferByte(spy, WRITE);
-  two = spiTransferByte(spy, WRITE);
-  three = spiTransferByte(spy, WRITE);
-  four = spiTransferByte(spy, WRITE);	
-  spiSSClear(spy);
-  spiStopBus(spy);
-  #endif  
-  
-  
-  // digitalWrite(_SS, LOW);  //Enable data transfer by bringing SS line LOW
-  // SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  // SPI.transfer(MSB);  //Pass in MSB of register to be read first.
-  // SPI.transfer(LSB);  //Pass in LSB of register to be read next.
-  // //Read in values sequentially and bitshift for a 32 bit entry
-  // SPI.transfer(READ); //Send command to begin readout
-  // one= SPI.transfer(WRITE); //MSB Byte 1  (Read in data on dummy write (null MOSI signal))
-  // two= SPI.transfer(WRITE);   // (Read in data on dummy write (null MOSI signal))
-  // three= SPI.transfer(WRITE);   // (Read in data on dummy write (null MOSI signal))
-  // four= SPI.transfer(WRITE); //LSB Byte 4  (Read in data on dummy write (null MOSI signal))
-  // SPI.endTransaction();
-  // digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH
+
   
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print("ADE7953::spiAlgorithm32_read function details: ");
-   //Serial.print("Address Byte 1(MSB)[HEX]: ");  
-   //Serial.print(MSB, BIN);
-   //Serial.print(" Address Byte 2(LSB)[HEX]: ");  
-   //Serial.print(LSB, BIN);
+   Serial.print("SPI32Algorithm Reading:  Address Byte 1(MSB)[HEX]: ");  
+   Serial.print(MSB, BIN);
+   Serial.print(" Address Byte 2(LSB)[HEX]: ");  
+   Serial.print(LSB, BIN);
    Serial.print(" Returned bytes (1(MSB) to 4)[HEX]: ");
    Serial.print(one, BIN);
    Serial.print(" ");
@@ -1134,7 +961,7 @@ void ADE7953::spiAlgorithm32_write(byte MSB, byte LSB, byte onemsb, byte two, by
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print(" spiAlgorithm32_write function started "); 
   #endif 
-  #ifdef NEWBRANDY
+
   spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
   spiAttachSCK(spy, -1);
   spiAttachMOSI(spy, -1);
@@ -1149,54 +976,7 @@ void ADE7953::spiAlgorithm32_write(byte MSB, byte LSB, byte onemsb, byte two, by
   spiTransferByte(spy, fourlsb); 	
   digitalWrite(_SS, HIGH);
   spiStopBus(spy);
-  #endif
-  #ifdef BRANDY
-  spy = spiStartBus(FSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMOSI(spy, -1);
-  spiAttachMISO(spy, -1);
-  //pinMode(_SS, OUTPUT);
-  //digitalWrite(_SS, HIGH);  
-  digitalWrite(_SS, LOW);
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);
-  spiTransferByte(spy, WRITE);
-  spiTransferByte(spy, onemsb);
-  spiTransferByte(spy, two);
-  spiTransferByte(spy, three);
-  spiTransferByte(spy, fourlsb); 	
-  digitalWrite(_SS, HIGH);
-  spiStopBus(spy);
-  #endif
-  #ifdef DEVKIT
-  spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMISO(spy, -1);
-  spiAttachMOSI(spy, -1);  
-  spiAttachSS(spy, -1, -1);
-  spiEnableSSPins(spy, SPI_CS0);
-  spiSSSet(spy);
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);
-  spiTransferByte(spy, WRITE);
-  spiTransferByte(spy, onemsb);
-  spiTransferByte(spy, two);
-  spiTransferByte(spy, three);
-  spiTransferByte(spy, fourlsb);  
-  spiSSClear(spy);
-  #endif  
-  
-  // digitalWrite(_SS, LOW);  //Enable data transfer by bringing SS line LOW
-  // SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  // SPI.transfer(MSB);  //Pass in MSB of register to be read first.
-  // SPI.transfer(LSB);  //Pass in LSB of register to be read next.
-  // //Send the Write command
-  // SPI.transfer(WRITE);
-  // SPI.transfer(onemsb);
-  // SPI.transfer(two);
-  // SPI.transfer(three);
-  // SPI.transfer(fourlsb);
-  // digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH
+
   
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print("ADE7953::spiAlgorithm32_read function details: ");
@@ -1220,7 +1000,7 @@ void ADE7953::spiAlgorithm32_write(byte MSB, byte LSB, byte onemsb, byte two, by
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print(" spiAlgorithm24_write function started "); 
   #endif
-  #ifdef NEWBRANDY
+
   spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
   spiAttachSCK(spy, -1);
   spiAttachMOSI(spy, -1);
@@ -1234,51 +1014,7 @@ void ADE7953::spiAlgorithm32_write(byte MSB, byte LSB, byte onemsb, byte two, by
   spiTransferByte(spy, threelsb);
   digitalWrite(_SS, HIGH);
   spiStopBus(spy);
-  #endif
-  #ifdef BRANDY
-  spy = spiStartBus(FSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMOSI(spy, -1);
-  spiAttachMISO(spy, -1);
-  //pinMode(_SS, OUTPUT);
-  //digitalWrite(_SS, HIGH);  
-  digitalWrite(_SS, LOW);
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);
-  spiTransferByte(spy, WRITE);
-  spiTransferByte(spy, onemsb);
-  spiTransferByte(spy, two);
-  spiTransferByte(spy, threelsb);
-  digitalWrite(_SS, HIGH);
-  spiStopBus(spy);
-  #endif
-  #ifdef DEVKIT
-  spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMISO(spy, -1);
-  spiAttachMOSI(spy, -1);  
-  spiAttachSS(spy, -1, -1);
-  spiEnableSSPins(spy, SPI_CS0);
-  spiSSSet(spy);
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);
-  spiTransferByte(spy, WRITE);
-  spiTransferByte(spy, onemsb);
-  spiTransferByte(spy, two);
-  spiTransferByte(spy, threelsb);  
-  spiSSClear(spy);
-  #endif
-  
-  // digitalWrite(_SS, LOW);  //Enable data transfer by bringing SS line LOW
-  // SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  // SPI.transfer(MSB);  //Pass in MSB of register to be read first.
-  // SPI.transfer(LSB);  //Pass in LSB of register to be read next.
-  // //Send the Write command
-  // SPI.transfer(WRITE);
-  // SPI.transfer(onemsb);
-  // SPI.transfer(two);
-  // SPI.transfer(threelsb);
-  // digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH
+
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print("ADE7953::spiAlgorithm24_read function details: ");
    Serial.print("Address Byte 1(MSB)[HEX]: ");  
@@ -1299,7 +1035,7 @@ void ADE7953::spiAlgorithm16_write(byte MSB, byte LSB, byte onemsb, byte twolsb)
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print(" spiAlgorithm16_write function started "); 
   #endif
-  #ifdef NEWBRANDY
+
   spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
   spiAttachSCK(spy, -1);
   spiAttachMOSI(spy, -1);
@@ -1312,48 +1048,7 @@ void ADE7953::spiAlgorithm16_write(byte MSB, byte LSB, byte onemsb, byte twolsb)
   spiTransferByte(spy, twolsb);
   digitalWrite(_SS, HIGH);
   spiStopBus(spy);
-  #endif
-  #ifdef BRANDY
-  spy = spiStartBus(FSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMOSI(spy, -1);
-  spiAttachMISO(spy, -1);
-  //pinMode(_SS, OUTPUT);
-  //digitalWrite(_SS, HIGH);  
-  digitalWrite(_SS, LOW);
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);
-  spiTransferByte(spy, WRITE);
-  spiTransferByte(spy, onemsb);
-  spiTransferByte(spy, twolsb);
-  digitalWrite(_SS, HIGH);
-  spiStopBus(spy);
-  #endif
-  #ifdef DEVKIT
-  spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMISO(spy, -1);
-  spiAttachMOSI(spy, -1);  
-  spiAttachSS(spy, -1, -1);
-  spiEnableSSPins(spy, SPI_CS0);
-  spiSSSet(spy);
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);
-  spiTransferByte(spy, WRITE);
-  spiTransferByte(spy, onemsb);
-  spiTransferByte(spy, twolsb);
-  spiSSClear(spy);
-  #endif
-  
-  // digitalWrite(_SS, LOW);  //Enable data transfer by bringing SS line LOW
-  // SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  // SPI.transfer(MSB);  //Pass in MSB of register to be read first.
-  // SPI.transfer(LSB);  //Pass in LSB of register to be read next.
-  // //Send the Write command
-  // SPI.transfer(WRITE);
-  // SPI.transfer(onemsb);
-  // SPI.transfer(twolsb);
-  // digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH
+
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print("ADE7953::spiAlgorithm16_read function details: ");
    Serial.print("Address Byte 1(MSB)[HEX]: ");  
@@ -1372,7 +1067,7 @@ void ADE7953::spiAlgorithm8_write(byte MSB, byte LSB, byte onemsb) { //This is t
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print(" spiAlgorithm8_write function started "); 
   #endif
-  #ifdef NEWBRANDY
+
   spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
   spiAttachSCK(spy, -1);
   spiAttachMOSI(spy, -1);
@@ -1384,45 +1079,8 @@ void ADE7953::spiAlgorithm8_write(byte MSB, byte LSB, byte onemsb) { //This is t
   spiTransferByte(spy, onemsb);
   digitalWrite(_SS, HIGH);
   spiStopBus(spy);
-  #endif
-  #ifdef BRANDY
-  spy = spiStartBus(FSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMOSI(spy, -1);
-  spiAttachMISO(spy, -1);
-  //pinMode(_SS, OUTPUT);
-  //digitalWrite(_SS, HIGH);  
-  digitalWrite(_SS, LOW);
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);
-  spiTransferByte(spy, WRITE);
-  spiTransferByte(spy, onemsb);
-  digitalWrite(_SS, HIGH);
-  spiStopBus(spy);
-  #endif
-  #ifdef DEVKIT
-  spy = spiStartBus(VSPI, SPI_CLOCK_DIV16, SPI_MODE3, SPI_MSBFIRST);
-  spiAttachSCK(spy, -1);
-  spiAttachMISO(spy, -1);
-  spiAttachMOSI(spy, -1);  
-  spiAttachSS(spy, -1, -1);
-  spiEnableSSPins(spy, SPI_CS0);
-  spiSSSet(spy);
-  spiTransferByte(spy, MSB);
-  spiTransferByte(spy, LSB);
-  spiTransferByte(spy, WRITE);
-  spiTransferByte(spy, onemsb);
-  spiSSClear(spy);  
-  #endif
-  
-  // digitalWrite(_SS, LOW);  //Enable data transfer by bringing SS line LOW
-  // SPI.beginTransaction(SPISettings(_SPI_freq, MSBFIRST, SPI_MODE3));  //Begin SPI transfer with most significant byte (MSB) first. Clock is high when inactive. Read at rising edge: SPIMODE3.
-  // SPI.transfer(MSB);  //Pass in MSB of register to be read first.
-  // SPI.transfer(LSB);  //Pass in LSB of register to be read next.
-  // //Send the Write command
-  // SPI.transfer(WRITE);
-  // SPI.transfer(onemsb);
-  // digitalWrite(_SS, HIGH);  //End data transfer by bringing SS line HIGH
+
+
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print("ADE7953::spiAlgorithm8_read function details: ");
    Serial.print("Address Byte 1(MSB)[HEX]: ");  
