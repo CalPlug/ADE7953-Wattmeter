@@ -47,6 +47,11 @@ spi_t * spy; //for ESP32
 #define getInstReactivePowerB_m 1.0 
 #define getInstReactivePowerB_b 0.0
 
+#define getInstApparentPowerB_m 1.0 
+#define getInstApparentPowerB_b 0.0
+
+#define getInstActivePowerA_m 1.0 
+#define getInstActivePowerA_b 0.0
 
 
 
@@ -651,7 +656,7 @@ return abs(decimal);
   
 float ADE7953::getInstApparentPowerB(){  
 	long value=0;  
-	value=spiAlgorithm32_read((functionBitVal(AVB_32,1)),(functionBitVal(AVB_32,0))); 
+	value=spiAlgorithm32_read((functionBitVal(BVA_32,1)),(functionBitVal(BVA_32,0))); 
 	float decimal = decimalize(value, getInstApparentPowerB_m, getInstApparentPowerB_b);
 return abs(decimal);
   }
