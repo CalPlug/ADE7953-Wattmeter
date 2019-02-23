@@ -31,7 +31,7 @@ class ADE7953 {
 	float getPowerFactorA();
 	float getPowerFactorB();
 	float getPeriod();	
-	int16_t getPhaseCalibA();.
+	int16_t getPhaseCalibA();
 	int16_t getPhaseCalibB();
 	unsigned long getAPNOLOAD();
     long getInstVoltage();
