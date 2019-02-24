@@ -525,7 +525,7 @@ return abs(decimal);
 float ADE7953::getPowerFactorB(){  
 	int16_t value=0;  
 	value=spiAlgorithm16_read((functionBitVal(PFB_16,1)),(functionBitVal(PFB_16,0))); 
-	float decimal = decimalize(value, getPowerFactorA_m, getPowerFactorA_b);
+	float decimal = decimalize(value, getPowerFactorB_m, getPowerFactorB_b);
 return abs(decimal);
   }   
 
