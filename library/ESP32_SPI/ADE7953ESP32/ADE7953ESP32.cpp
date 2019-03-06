@@ -927,7 +927,6 @@ uint32_t ADE7953::spiAlgorithm32_read(byte MSB, byte LSB) { //This is the algori
   four = spiTransferByte(spy, WRITE);	
   digitalWrite(_SS, HIGH);
   spiStopBus(spy);
-
   
   #ifdef ADE7953_VERBOSE_DEBUG
    Serial.print("ADE7953::spiAlgorithm32_read function details: ");
